@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>826</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(119, 118, 123);
+border-color: rgb(119, 118, 123);</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="10,2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,10,1">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_display_2">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="4,10">
+        <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="title">
+           <string>输入</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="pushButton_cam">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton{
+	image: url(:/images/icons/camera_on.png);
+font-size: 14px;
+font-weight: bold;
+color:white;
+text-align: center center;
+padding-left: 5px;
+padding-right: 5px;
+padding-top: 4px;
+padding-bottom: 4px;
+border-style: solid;
+border-width: 0px;
+border-color: rgba(255, 255, 255, 255);
+border-radius: 3px;
+background-color: rgba(200, 200, 200,0);}
+
+QPushButton:focus{outline: none;}
+
+QPushButton::pressed{
+                     font-size: 14px;
+                     font-weight: bold;
+                     color:rgb(200,200,200);
+                     text-align: center center;
+                     padding-left: 5px;
+                     padding-right: 5px;
+                     padding-top: 4px;
+                     padding-bottom: 4px;
+                     border-style: solid;
+                     border-width: 0px;
+                     border-color: rgba(255, 255, 255, 255);
+                     border-radius: 3px;
+                     background-color:  #bf513b;}
+
+QPushButton::disabled{
+                     image: url(:/images/icons/camera_off.png);
+                     font-size: 14px;
+                     font-weight: bold;
+                     color:rgb(200,200,200);
+                     text-align: center center;
+                     padding-left: 5px;
+                     padding-right: 5px;
+                     padding-top: 4px;
+                     padding-bottom: 4px;
+                     border-style: solid;
+                     border-width: 0px;
+                     border-color: rgba(255, 255, 255, 255);
+                     border-radius: 3px;}
+QPushButton::hover {
+border-style: solid;
+border-width: 0px;
+border-radius: 0px;
+background-color: rgba(48,148,243,80);}url(:/images/icons/camera_on.png)</string>
+             </property>
+             <property name="text">
+              <string>输入</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="title">
+           <string>焦距</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_conf">
+             <property name="styleSheet">
+              <string notr="true">QDoubleSpinBox{
+background:rgba(200, 200, 200,50);
+color:white;
+font-size: 24px;
+border-style: solid;
+border-width: 1px;
+border-color: rgba(200, 200, 200,100);
+border-radius: 3px;}
+
+QDoubleSpinBox::down-button{
+background:rgba(200, 200, 200,0);
+border-image: url(:/images/icons/botton_down.png);}
+QDoubleSpinBox::down-button::hover{
+background:rgba(200, 200, 200,100);
+border-image: url(:/images/icons/botton_down.png);}
+
+QDoubleSpinBox::up-button{
+background:rgba(200, 200, 200,0);
+border-image: url(:/images/icons/botton_up.png);}
+QDoubleSpinBox::up-button::hover{
+background:rgba(200, 200, 200,100);
+border-image: url(:/images/icons/botton_up.png);}</string>
+             </property>
+             <property name="maximum">
+              <double>99999.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+             <property name="value">
+              <double>1000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="horizontalSlider">
+             <property name="styleSheet">
+              <string notr="true">QSlider{
+border-color: #bcbcbc;
+color:#d9d9d9;
+}
+QSlider::groove:horizontal {                                
+     border: 1px solid #999999;                             
+     height: 3px;                                           
+    margin: 0px 0;                                         
+     left: 5px; right: 5px; 
+ }
+QSlider::handle:horizontal {                               
+     border: 0px ; 
+     border-image: url(:/images/icons/point.png);
+	 width:15px;
+     margin: -7px -7px -7px -7px;                  
+} 
+QSlider::add-page:horizontal{
+background: #d9d9d9; 
+
+}
+QSlider::sub-page:horizontal{                               
+ background: #373737;                     
+}</string>
+             </property>
+             <property name="maximum">
+              <number>99999</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
+             </property>
+             <property name="pageStep">
+              <number>99</number>
+             </property>
+             <property name="value">
+              <number>1000</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>826</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
