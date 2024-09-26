@@ -1,6 +1,7 @@
 import os
 
 import cv2
+import numpy as np
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5 import QtWidgets
 import cv2 as cv
@@ -15,6 +16,7 @@ class CameraCaptureThread(QThread):
     send_video_info = pyqtSignal(dict)
     send_frame = pyqtSignal(list)       # 发送帧信号
     send_cameraIsOpen = pyqtSignal()    # 当摄像头断开时发送信号
+
     def __init__(self):
         super(CameraCaptureThread, self).__init__()
         self.thread_name = "CameraCaptureThread"
@@ -24,11 +26,11 @@ class CameraCaptureThread(QThread):
 
         self.video_info = []
         self.VM = cv.VideoWriter()          # 创建一个视频写入对象
+        self.frame = np.zeros((1, 1, 3), dtype=np.uint8)
 
         self.focus = -1
         self.time0 = -1
         self.time1 = -1
-        self.time = -1
 
     def set_start_config(self, ai_task, video_source=-1):
         self.threadFlag = True
@@ -41,6 +43,10 @@ class CameraCaptureThread(QThread):
         self.save_picture_interval = get_param("save picture interval")
         mkdir(self.video_path)
         mkdir(self.picture_path)
+        # 每3s保存一张图片
+        if self.ai_task in ["both", "save_picture"]:
+            timer = threading.Timer(self.save_picture_interval, self.save_picture)
+            timer.start()
 
     def get_video_source(self, video_source):
         self.video_source = video_source
@@ -108,12 +114,11 @@ class CameraCaptureThread(QThread):
         # id = 0
         # time0 = time.time()
         while self.threadFlag:
-            ret, frame = self.cap.read()
+            ret, self.frame = self.cap.read()
             if ret is False:
                 print("相机线程无法获得图片-摄像头断开连接！")
                 self.send_cameraIsOpen.emit()
                 # QtWidgets.QMessageBox.warning(None, "提示", "摄像头断开连接！", QtWidgets.QMessageBox.Ok)
-                # cv2.waitKey(5000)
                 break
                 # continue
             # if time.time() - time0 >= 1:
@@ -123,22 +128,12 @@ class CameraCaptureThread(QThread):
             # id += 1
             # 视频保存
             if self.ai_task in ["both", "object_detection"] and self.save_vedio:
-                self.VM.write(frame)
+                self.VM.write(self.frame)
                 cv.waitKey(1)
             # 发送帧索引号和当前帧
-            self.send_frame.emit(list([idx_frame, frame]))
+            self.send_frame.emit(list([idx_frame, self.frame]))
             # print(idx_frame)
             idx_frame += 1
-            # 每3s保存一张图片
-            if self.ai_task in ["both", "save_picture"]:
-                if self.time == -1:
-                    self.time = time.time()
-                if time.time() - self.time >= self.save_picture_interval:
-                    self.time = time.time()
-                    self.save_picture(frame)
-                    # cv.imwrite(self.picture_path + "/" + "Picture-{}.jpg".format(time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())), frame)
-            else:
-                self.time = -1
 
         self.send_frame.emit(list([None, None]))
         self.cap.release()
@@ -146,11 +141,11 @@ class CameraCaptureThread(QThread):
             self.VM.release()
         print("视频保存结束")
 
-    def save_picture(self, picture):
+    def save_picture(self):
         now = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())  # 2024-07-12 11:04:06
         now_date = now[0:10]    # 2024-07-12
         now_h = now[11:13]      # 11
-        now_min = now[14:16]    # 04
+        # now_min = now[14:16]    # 04
         now_name = now   # 11:04:06
         data_dir = self.picture_path + "/" + now_date
         mkdir(data_dir)
@@ -166,7 +161,7 @@ class CameraCaptureThread(QThread):
         #     moment_dir = h_dir + "/" + "{}_45-{}_00".format(now_h, int(now_h)+1)
         # mkdir(moment_dir)
 
-        cv.imwrite(h_dir + "/" + "Picture-{}.jpg".format(now_name), picture)
+        cv.imwrite(h_dir + "/" + "Picture-{}.jpg".format(now_name), self.frame)
 
 
 def mkdir(path):
