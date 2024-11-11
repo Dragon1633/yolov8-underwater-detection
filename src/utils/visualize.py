@@ -35,7 +35,7 @@ def draw_keypoints(image, keypoints, color, kpt_score_threshold=0.3, radius=4, t
     return image
 
 
-def draw_results(image, model_results):
+def draw_results(image, model_results, k=1):
     img_cpy = image.copy()
     if model_results == []:
         return img_cpy
@@ -82,16 +82,22 @@ def draw_results(image, model_results):
         elif font_scale > 2:
             font_scale = 2.0
         thickness = math.ceil(min(width, height) * THICKNESS_SCALE)
-        txt_size = cv.getTextSize(text, font, 0.4, 1)[0]
+        # txt_size = cv.getTextSize(text, font, 0.4, 1)[0]
         cv.rectangle(img_cpy, (x0, y0), (x1, y1), color, int(thickness*5*font_scale))
-        # cv.rectangle(
-        #     img_cpy,
-        #     (x0, y0 + 1),
-        #     (x0 + txt_size[0] + 1, y0 + int(1.5*txt_size[1])),
-        #     color,
-        #     -1)
-        # cv.putText(img_cpy, text, (x0, y0 + txt_size[1]), font, font_scale, txt_color_dark, thickness=thickness+1)
-        # cv.putText(img_cpy, text, (x0, y0 + txt_size[1]), font, font_scale, txt_color_light, thickness=thickness)
+        # 如果是指定类，则将最大的边×比例尺显示出来
+        # if class_name == "vortex":
+        if class_name == "person" or class_name == "vortex":      # person调试时候用
+            max_side = max(x1 - x0, y1 - y0)
+            text = str(round(max_side*k, 1))+"mm"
+            txt_size = cv.getTextSize(text, font, 0.5, 1)[0]
+            cv.rectangle(
+                img_cpy,
+                (x0, y0 + 1),
+                (x0 + txt_size[0] + 1, y0 + int(1.5*txt_size[1])),
+                color,
+                -1)
+            cv.putText(img_cpy, text, (x0, y0 + txt_size[1]), font, font_scale, txt_color_dark, thickness=thickness+1)
+            # cv.putText(img_cpy, text, (x0, y0 + txt_size[1]), font, font_scale, txt_color_light, thickness=thickness)
     return img_cpy
 
 
@@ -145,14 +151,14 @@ def draw_results_circle(image, model_results):
     txt_size = cv.getTextSize(text, font, 0.4, 1)[0]
     # cv.rectangle(img_cpy, (x0, y0), (x1, y1), color, int(thickness * 5 * font_scale))
     # 把检测框改为圆形，最小外接圆，先补全正方形在画圆
-    dx = int(x1 - x0)
-    dy = int(y1 - y0)
-    if dx > dy:
-        y1 += (dx - dy)
-    elif dy > dx:
-        x1 += (dy - dx)
+    # dx = int(x1 - x0)
+    # dy = int(y1 - y0)
+    # if dx > dy:
+    #     y1 += (dx - dy)
+    # elif dy > dx:
+    #     x1 += (dy - dx)
     center = (int((x0 + x1) / 2), int((y0 + y1) / 2))
-    radius = int((x1 - x0) / 2)
+    radius = max(int((x1 - x0) / 2), int((y1 - y0) / 2))
     cv2.circle(img_cpy, center, radius, color, int(thickness * 5 * font_scale))
     result = list([radius, img_cpy])
     # print("检测圆的半径为：", radius)

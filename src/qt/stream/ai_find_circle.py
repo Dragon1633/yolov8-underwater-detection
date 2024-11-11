@@ -1,13 +1,13 @@
 import copy
 import cv2
 from PyQt5.QtCore import QThread, pyqtSignal
-from src.models.detection.yolov8_detector_onnx import YoloDetector
+from src.models.detection.yolov8_detector_onnx_c import YoloDetector
 from src.models.tracking.deep_sort.deep_sort import DeepSort
 from src.models.tracking.byte_track.byte_tracker import BYTETracker
 
 from src.data_type.video_buffer import LatestFrame
 from src.utils.general import ROOT, add_image_id, get_param
-from src.utils.visualize import draw_results_circle
+from src.utils.visualize import draw_results_circle, draw_results
 import os
 import time
 
@@ -20,16 +20,15 @@ class AiWorkerThread2(QThread):
         self.thread_name = "AiWorkerThread"
         self.threadFlag = False
 
-    def set_start_config(self, model_name="yolov8n_circle", tracker_name="deepsort", confidence_threshold=0.35,
+    def set_start_config(self, model_name="yolov8n_circle", confidence_threshold=0.35,
                          iou_threshold=0.45):
         self.threadFlag = True
         self.latest_frame = LatestFrame()
         self.confi_thr = confidence_threshold
         self.iou_thr = iou_threshold
         self.model_name = model_name
-        self.tracker_name = tracker_name
         self._init_yolo()
-        self._init_tracker()
+        # self._init_tracker()
         # print(self.model_name)
 
     def set_iou_threshold(self, iou_threshold):
@@ -51,18 +50,18 @@ class AiWorkerThread2(QThread):
             confidence_threshold=self.confi_thr,
             iou_threshold=self.iou_thr)
 
-    def _init_tracker(self):
-        if self.tracker_name == "deepsort":
-            self.tracker = DeepSort(
-                model_path=os.path.join(ROOT, f"weights/ckpt.t7"))
-        elif self.tracker_name == "bytetrack":
-            self.tracker = BYTETracker(
-                track_high_thresh=0.5,
-                track_low_thresh=0.1,
-                new_track_thresh=0.6,
-                match_thresh=0.8,
-                track_buffer=30,
-                frame_rate=30)
+    # def _init_tracker(self):
+    #     if self.tracker_name == "deepsort":
+    #         self.tracker = DeepSort(
+    #             model_path=os.path.join(ROOT, f"weights/ckpt.t7"))
+    #     elif self.tracker_name == "bytetrack":
+    #         self.tracker = BYTETracker(
+    #             track_high_thresh=0.5,
+    #             track_low_thresh=0.1,
+    #             new_track_thresh=0.6,
+    #             match_thresh=0.8,
+    #             track_buffer=30,
+    #             frame_rate=30)
 
     def get_frame(self, frame_list):
         self.latest_frame.put(frame=frame_list[1], frame_id=frame_list[0], realtime=True)
@@ -92,7 +91,8 @@ class AiWorkerThread2(QThread):
 
     def get_model_output(self, frame, use_tracker=True):
         model_output = self.detector.inference(frame, self.confi_thr, self.iou_thr)
-        if use_tracker:
-            model_output = self.tracker.update(detection_results=model_output, ori_img=frame)
+        # if use_tracker:
+        #     model_output = self.tracker.update(detection_results=model_output, ori_img=frame)
         result = draw_results_circle(frame, model_output)
+        # result = draw_results(frame, model_output)
         return result

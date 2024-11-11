@@ -9,7 +9,10 @@ from src.utils.general import get_param
 class ModbusThread(QThread):
     def __init__(self):
         super(ModbusThread, self).__init__()
-        self.master = mt.TcpMaster('192.168.1.30', 502)
+        ip = get_param('modbus_ip')
+        port = get_param('modbus_port')
+        self.master = mt.TcpMaster(ip, port)
+        # self.master = mt.TcpMaster('192.168.1.30', 502)
         self.master.set_timeout(5)
         self.output_state = "waiting"      # OK,Waiting,NG,Buzzer分别对应绿灯、黄灯、红灯、蜂鸣器,对应的输出端口分别对应108,109,110,111
         self.time0 = -1
@@ -23,13 +26,6 @@ class ModbusThread(QThread):
         self.threadFlag = True
         self.ai_task = ai_task
 
-    # def get_ai_output(self, ai_output):
-    #     self.ai_output = ai_output
-    #     self.threadFlag = True
-    #
-    # def change_to_waiting_state(self):
-    #     self.output_state = "waiting"
-
     def get_state(self, state):
         state = state.lower()
         if state in ["ok", "ng", "waiting"]:
@@ -37,6 +33,8 @@ class ModbusThread(QThread):
             # print("modbus的状态", state)
 
     def change_output_state(self, output_state):
+        """根据output_state参数来改变io模块的状态"""
+        print("modbus状态改变", output_state)
         if output_state == "":
             return
         elif output_state == "ok":  # 绿灯
@@ -44,19 +42,19 @@ class ModbusThread(QThread):
                 self.master.execute(slave=1, function_code=cst.WRITE_MULTIPLE_COILS, starting_address=108,
                                     quantity_of_x=4, output_value=[1, 0, 0, 0])  # 写多个线圈分别对应绿灯、黄灯、红灯、蜂鸣器
             except Exception as e:
-                print('error_ok: %s' % e)
+                print('modbus置OK状态失败: %s' % e)
         elif output_state == "ng":  # 红灯+蜂鸣器
             try:
                 self.master.execute(slave=1, function_code=cst.WRITE_MULTIPLE_COILS, starting_address=108,
                                     quantity_of_x=4, output_value=[0, 0, 1, 1])  # 写多个线圈
             except Exception as e:
-                print('error_ng: %s' % e)
+                print('modbus置NG状态失败: %s' % e)
         elif output_state == "waiting":     # 黄灯
             try:
                 self.master.execute(slave=1, function_code=cst.WRITE_MULTIPLE_COILS, starting_address=108,
                                     quantity_of_x=4, output_value=[0, 1, 0, 0])  # 写多个线圈
             except Exception as e:
-                print('error_waiting: %s' % e)
+                print('modbus置waiting状态失败: %s' % e)
 
     def monitor_input(self):
         try:

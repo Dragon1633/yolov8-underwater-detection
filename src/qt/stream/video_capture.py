@@ -2,7 +2,7 @@ import os
 
 import cv2
 import numpy as np
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from PyQt5 import QtWidgets
 import cv2 as cv
 import datetime
@@ -45,8 +45,12 @@ class CameraCaptureThread(QThread):
         mkdir(self.picture_path)
         # 每3s保存一张图片
         if self.ai_task in ["both", "save_picture"]:
-            timer = threading.Timer(self.save_picture_interval, self.save_picture)
-            timer.start()
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.save_picture)
+            self.timer.start(self.save_picture_interval*1000)
+            # timer = threading.Timer(self.save_picture_interval, self.save_picture)
+            # timer.start()
+            print("每3s保存一张图片开启！")
 
     def get_video_source(self, video_source):
         self.video_source = video_source
@@ -66,40 +70,45 @@ class CameraCaptureThread(QThread):
         video_info["size"] = (int(video_cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(video_cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
         return video_info
 
-    def start_save_video(self, ai_output):
-        contains_person = any(item.get('class') in self.detected_object for item in ai_output)
-        if not contains_person:     # 检测到目标持续1s开始保存视频
-            self.time1 = -1
-            if self.time0 == -1:
-                self.time0 = time.time()
-            elif time.time() - self.time0 > get_param("exist object time") and self.save_vedio is False:
-                self.save_vedio = True
-        else:                   # 未检测到目标持续3s停止保存视频
-            if self.time1 == -1:
-                self.time1 = time.time()
-            elif time.time() - self.time1 > get_param("no object time"):
-                self.save_vedio = False
-                self.time0 = -1
+    def start_save_video(self):
+        # contains_person = any(item.get('class') in self.detected_object for item in ai_output)
+        # if not contains_person:     # 检测到目标持续1s开始保存视频
+        #     self.time1 = -1
+        #     if self.time0 == -1:
+        #         self.time0 = time.time()
+        #     elif time.time() - self.time0 > get_param("exist object time") and self.save_vedio is False:
+        #         self.save_vedio = True
+        # else:                   # 未检测到目标持续3s停止保存视频
+        #     if self.time1 == -1:
+        #         self.time1 = time.time()
+        #     elif time.time() - self.time1 > get_param("no object time"):
+        #         self.save_vedio = False
+        #         self.time0 = -1
         # 创建视频
-        if self.save_vedio and self.save_flag and self.VM.isOpened() is False and self.ai_task in ["both", "object_detection"]:
+        if self.threadFlag and  self.save_vedio and self.save_flag and self.VM.isOpened() is False and self.ai_task in ["both", "object_detection"]:
             fourcc = cv.VideoWriter_fourcc(*"mp4v")  # 保存的格式
-            temp = self.video_path.split("/")
-            real_path = ""
-            for i in range(0, len(temp)):
-                real_path += temp[i]
-                if i != len(temp) - 1:
-                    real_path += "\\"
+            # temp = self.video_path.split("/")
+            # real_path = ""
+            # for i in range(0, len(temp)):
+            #     real_path += temp[i]
+            #     if i != len(temp) - 1:
+            #         real_path += "\\"
             FName = fr"video{time.strftime('%Y-%m-%d_%H_%M_%S', time.localtime())}"
-            print("视频创建！", FName)
+            # print("视频创建！", FName)
             # 第一个参数是文件保存的名字，第二个参数是文件名称，第三个参数是帧率，第四个参数是文件的尺寸大小
-            self.VM = cv.VideoWriter(real_path + "\\{}.mp4".format(FName), fourcc, 24,
+            self.VM = cv.VideoWriter(self.video_path + "\\{}.mp4".format(FName), fourcc, 24,
                                      self.video_info["size"])
         elif not self.save_vedio:
             if self.VM:
                 self.VM.release()
 
+    def change_save_state(self, flag=True):
+        self.save_vedio = flag
+
     def stop_capture(self):
         self.threadFlag = False
+        if self.VM:
+            self.VM.release()
 
     def run(self):
         try:
@@ -111,8 +120,8 @@ class CameraCaptureThread(QThread):
         self.send_video_info.emit(self.video_info)
 
         idx_frame = 0
-        # id = 0
-        # time0 = time.time()
+        id = 0
+        time0 = time.time()
         while self.threadFlag:
             ret, self.frame = self.cap.read()
             if ret is False:
@@ -121,15 +130,20 @@ class CameraCaptureThread(QThread):
                 # QtWidgets.QMessageBox.warning(None, "提示", "摄像头断开连接！", QtWidgets.QMessageBox.Ok)
                 break
                 # continue
-            # if time.time() - time0 >= 1:
-            #     print("1s输出的帧为：",id)
-            #     id = 0
-            #     time0 = time.time()
-            # id += 1
+            if time.time() - time0 >= 1:
+                print("1s输出的帧为：", id)
+                id = 0
+                time0 = time.time()
+            id += 1
             # 视频保存
             if self.ai_task in ["both", "object_detection"] and self.save_vedio:
+                # print("启用保存视频！")
+                self.start_save_video()
                 self.VM.write(self.frame)
                 cv.waitKey(1)
+            else:
+                if self.VM:
+                    self.VM.release()
             # 发送帧索引号和当前帧
             self.send_frame.emit(list([idx_frame, self.frame]))
             # print(idx_frame)
@@ -142,6 +156,7 @@ class CameraCaptureThread(QThread):
         print("视频保存结束")
 
     def save_picture(self):
+        # print("开始存图")
         now = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())  # 2024-07-12 11:04:06
         now_date = now[0:10]    # 2024-07-12
         now_h = now[11:13]      # 11
@@ -160,10 +175,12 @@ class CameraCaptureThread(QThread):
         # else:
         #     moment_dir = h_dir + "/" + "{}_45-{}_00".format(now_h, int(now_h)+1)
         # mkdir(moment_dir)
+        try:
+            cv.imwrite(h_dir + "/" + "Picture-{}.jpg".format(now_name), self.frame)
+        except:
+            pass
 
-        cv.imwrite(h_dir + "/" + "Picture-{}.jpg".format(now_name), self.frame)
 
-
-def mkdir(path):
+def mkdir(path):#G-Dragon
     if not os.path.exists(path):
         os.makedirs(path)

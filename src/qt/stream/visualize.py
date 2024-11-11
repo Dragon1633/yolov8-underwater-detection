@@ -7,6 +7,7 @@ from src.data_type.video_buffer import FrameBuffer
 import cv2 as cv
 import numpy as np
 from src.utils.visualize import draw_results
+from src.utils.general import get_param
 import copy
 
 
@@ -21,6 +22,7 @@ class VideoVisualizationThread(QThread):
         self.thread_name = "VideoVisualizationThread"
         self.threadFlag = False
         self.frame_buffer = FrameBuffer(10)  # 表示该帧缓存可以存储10个帧。
+        self.scale = get_param("scale")
     
     def set_start_config(self, screen_size):
         self.threadFlag = True
@@ -47,7 +49,7 @@ class VideoVisualizationThread(QThread):
             # print(frame_id)
             if frame_id is not None:
                 # self.send_original_frame.emit(frame)
-                frame = draw_results(frame, self.ai_output)
+                frame = draw_results(frame, self.ai_output, self.scale)
                 # show_image = self.cvToQImage(self.showPicture(frame, self.ih, self.iw))
                 self.send_displayable_frame.emit(frame)
                 self.send_ai_output.emit(self.ai_output)
