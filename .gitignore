@@ -143,3 +143,16 @@ dist/
 build/
 test.py
 test2.py
+test3.py
+test4.py
+人工标注圆.py
+绘制透明矩形.py
+绘制透明矩形2.py
+icon.ico
+log.txt
+src/qt/stream/modbus_test.py
+src/ui/001.ui
+src/ui/menu1 - 副本.ui
+src/ui/untitled.ui
+src/ui/untitled2.ui
+src/ui/menu11.py
