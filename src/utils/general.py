@@ -28,7 +28,7 @@ def get_param(para_name):
     if os.path.exists(filename):
         if para_name in ["classes", "detected object", "detected task", "model path", "model name", "whether save video", "save video path",
                          "save error path", "save picture interval", "save picture path", "no object time", "exist object time",
-                         "waitkey time", "confidence", "iou", "focus"]:
+                         "waitkey time", "confidence", "iou", "focus", "scale", "modbus_ip", "modbus_port"]:
             with open(filename, encoding='utf-8') as f:
                 content = f.read()
                 param = json.loads(content)[para_name]
@@ -55,3 +55,4 @@ def add_image_id(model_outputs, image_id):
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+

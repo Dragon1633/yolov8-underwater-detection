@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1221, 823)
+        MainWindow.resize(1217, 823)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -124,6 +124,35 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.pushButton_outputExcel)
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem3)
+        self.pushButton_clear = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_clear.sizePolicy().hasHeightForWidth())
+        self.pushButton_clear.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("宋体")
+        font.setPointSize(15)
+        font.setBold(True)
+        
+        self.pushButton_clear.setFont(font)
+        self.pushButton_clear.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(192, 216, 255); /* 浅灰色 */\n"
+"    border: 1px solid #d4d4d4; /* 灰色边框 */\n"
+"    border-radius: 8px; /* 圆角 */\n"
+"    padding: 5px 10px; /* 内边距 */\n"
+"    color: rgb(10, 0, 0); /* 按钮文字颜色 */\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: rgb(235, 242, 255); /* 鼠标悬停时变亮 */\n"
+"}\n"
+"QPushButton:pressed {\n"
+"    background-color: rgb(157, 178, 255); /* 按下时颜色变深 */\n"
+"}")
+        self.pushButton_clear.setObjectName("pushButton_clear")
+        self.horizontalLayout_4.addWidget(self.pushButton_clear)
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem4)
         self.label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
@@ -139,8 +168,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setStretch(3, 6)
         self.horizontalLayout_4.setStretch(4, 2)
         self.horizontalLayout_4.setStretch(5, 6)
-        self.horizontalLayout_4.setStretch(6, 10)
+        self.horizontalLayout_4.setStretch(6, 2)
         self.horizontalLayout_4.setStretch(7, 6)
+        self.horizontalLayout_4.setStretch(8, 8)
+        self.horizontalLayout_4.setStretch(9, 6)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -151,8 +182,8 @@ class Ui_MainWindow(object):
         self.label_display.setText("")
         self.label_display.setObjectName("label_display")
         self.verticalLayout.addWidget(self.label_display)
-        spacerItem4 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem4)
+        spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem5)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.groupBox_1 = QtWidgets.QGroupBox(self.centralwidget)
@@ -395,7 +426,37 @@ class Ui_MainWindow(object):
         self.label_display_2.setText("")
         self.label_display_2.setObjectName("label_display_2")
         self.verticalLayout_2.addWidget(self.label_display_2)
-        self.tableWidget_results = QtWidgets.QTableWidget(self.centralwidget)
+        self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
+        self.tabWidget.setStyleSheet("QTabWidget::pane {\n"
+"    border: none;\n"
+"}\n"
+"\n"
+"QTabBar::tab {\n"
+"    /* background: #f0f0f0; 设置默认状态下的背景颜色 */\n"
+"    border: 1px solid #C2C7CB; /* 设置边框颜色 */\n"
+"    border-bottom-color: #828282; /* 设置底部边框颜色 */\n"
+"    min-width: 10ex; /* 最小宽度 */\n"
+"    padding: 5px; /* 内边距 */\n"
+"}\n"
+"\n"
+"QTabBar::tab:selected, QTabBar::tab:hover {\n"
+"     background: #e0e0e0; /* 设置选中或悬停状态下的背景颜色 */\n"
+"}\n"
+"QTabBar::tab:selected {\n"
+"    background: #e0e0e0; /* 设置选中状态下的背景颜色 */\n"
+"    border-color: #828282; /* 选中时的边框颜色 */\n"
+"    border-bottom-color: #fff; /* 底部边框颜色 */\n"
+"    margin-bottom: 0px; /* 调整底部间距以产生凸起效果 */\n"
+"}\n"
+"")
+        self.tabWidget.setUsesScrollButtons(True)
+        self.tabWidget.setObjectName("tabWidget")
+        self.tab = QtWidgets.QWidget()
+        self.tab.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.tab.setObjectName("tab")
+        self.horizontalLayout_9 = QtWidgets.QHBoxLayout(self.tab)
+        self.horizontalLayout_9.setObjectName("horizontalLayout_9")
+        self.tableWidget_results = QtWidgets.QTableWidget(self.tab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -412,6 +473,7 @@ class Ui_MainWindow(object):
         self.tableWidget_results.setStyleSheet("")
         self.tableWidget_results.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.tableWidget_results.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableWidget_results.setAutoScroll(True)
         self.tableWidget_results.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget_results.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tableWidget_results.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -451,12 +513,84 @@ class Ui_MainWindow(object):
         item.setFont(font)
         self.tableWidget_results.setHorizontalHeaderItem(3, item)
         self.tableWidget_results.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidget_results.horizontalHeader().setDefaultSectionSize(90)
         self.tableWidget_results.horizontalHeader().setSortIndicatorShown(False)
         self.tableWidget_results.horizontalHeader().setStretchLastSection(True)
         self.tableWidget_results.verticalHeader().setVisible(False)
-        self.verticalLayout_2.addWidget(self.tableWidget_results)
+        self.tableWidget_results.verticalHeader().setCascadingSectionResizes(False)
+        self.horizontalLayout_9.addWidget(self.tableWidget_results)
+        self.tabWidget.addTab(self.tab, "")
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.horizontalLayout_8 = QtWidgets.QHBoxLayout(self.tab_2)
+        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        self.tableWidget_ignore = QtWidgets.QTableWidget(self.tab_2)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tableWidget_ignore.sizePolicy().hasHeightForWidth())
+        self.tableWidget_ignore.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu")
+        font.setPointSize(11)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.tableWidget_ignore.setFont(font)
+        self.tableWidget_ignore.setAutoFillBackground(True)
+        self.tableWidget_ignore.setStyleSheet("")
+        self.tableWidget_ignore.setLineWidth(6)
+        self.tableWidget_ignore.setMidLineWidth(1)
+        self.tableWidget_ignore.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.tableWidget_ignore.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableWidget_ignore.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableWidget_ignore.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget_ignore.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.tableWidget_ignore.setObjectName("tableWidget_ignore")
+        self.tableWidget_ignore.setColumnCount(4)
+        self.tableWidget_ignore.setRowCount(0)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        
+        item.setFont(font)
+        self.tableWidget_ignore.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        
+        item.setFont(font)
+        self.tableWidget_ignore.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        
+        item.setFont(font)
+        self.tableWidget_ignore.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        
+        item.setFont(font)
+        self.tableWidget_ignore.setHorizontalHeaderItem(3, item)
+        self.tableWidget_ignore.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidget_ignore.horizontalHeader().setDefaultSectionSize(91)
+        self.tableWidget_ignore.horizontalHeader().setSortIndicatorShown(False)
+        self.tableWidget_ignore.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget_ignore.verticalHeader().setVisible(False)
+        self.horizontalLayout_8.addWidget(self.tableWidget_ignore)
+        self.tabWidget.addTab(self.tab_2, "")
+        self.verticalLayout_2.addWidget(self.tabWidget)
         self.verticalLayout_2.setStretch(0, 7)
-        self.verticalLayout_2.setStretch(1, 5)
+        self.verticalLayout_2.setStretch(1, 6)
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
         self.horizontalLayout_2.setStretch(0, 6)
         self.horizontalLayout_2.setStretch(1, 3)
@@ -466,7 +600,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.addLayout(self.verticalLayout_3)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1221, 31))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1217, 31))
         font = QtGui.QFont()
         font.setPointSize(14)
         font.setBold(True)
@@ -528,6 +662,7 @@ class Ui_MainWindow(object):
         self.menuBar.addAction(self.menu.menuAction())
 
         self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -536,6 +671,7 @@ class Ui_MainWindow(object):
         self.pushButton_stopWarning.setText(_translate("MainWindow", "停止报警"))
         self.pushButton_stopWarning_2.setText(_translate("MainWindow", "挂起"))
         self.pushButton_outputExcel.setText(_translate("MainWindow", "异常清单导出"))
+        self.pushButton_clear.setText(_translate("MainWindow", "一键清空屏蔽"))
         self.label.setText(_translate("MainWindow", "NG"))
         self.groupBox_1.setTitle(_translate("MainWindow", "设置"))
         self.groupBox_3.setTitle(_translate("MainWindow", "输入"))
@@ -548,6 +684,16 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "置信度"))
         item = self.tableWidget_results.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "时间"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "缺陷序列"))
+        item = self.tableWidget_ignore.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "序号"))
+        item = self.tableWidget_ignore.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "屏蔽类别"))
+        item = self.tableWidget_ignore.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "坐标"))
+        item = self.tableWidget_ignore.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "屏蔽时间"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "屏蔽区域"))
         self.menu.setTitle(_translate("MainWindow", "功能"))
         self.menu_sizeCalibration.setText(_translate("MainWindow", "尺寸标定"))
 from src.ui import apprcc

@@ -13,7 +13,7 @@ class YoloDetector(DetectorBase):
         self._model = None
     
     def init(self, model_path, confidence_threshold=0.3, iou_threshold=0.45):
-        _class_names = get_param("classes")
+        _class_names = ['circle']
         # _session = InferenceSession(model_path, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
         _session = InferenceSession(model_path, providers=['CPUExecutionProvider'])
         self.input_names, self.output_names, input_size = self.get_onnx_model_details(_session)     # 获取ONNX模型的详细信息
@@ -38,8 +38,8 @@ class YoloDetector(DetectorBase):
         boxes = xywh2xyxy(boxes)
         boxes *= scale
         dets = multiclass_nms_class_agnostic(boxes, predictions[:, 4:], iou_threshold, conf_threshold)
-        detection_results = []
-        i = 0
+        detection_results=[]
+        i=0
         for det in dets:
             obj_dict = {
                     "id": int(i),
@@ -70,5 +70,6 @@ class YoloDetector(DetectorBase):
             scale=scale,
             conf_threshold=confi_thres,
             iou_threshold=iou_thres,
-            class_names=self._model.class_names)
+            class_names=self._model.class_names
+        )
         return detection_results
