@@ -329,17 +329,18 @@ class Ui_Dialog(object):
         self.label_6.setFont(font)
         self.label_6.setObjectName("label_6")
         self.horizontalLayout_12.addWidget(self.label_6)
-        self.spinBox_vortexMinSize = QtWidgets.QSpinBox(self.groupBox_8)
+        self.doubleSpinBox_vortexMinSize = QtWidgets.QDoubleSpinBox(self.groupBox_8)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.spinBox_vortexMinSize.sizePolicy().hasHeightForWidth())
-        self.spinBox_vortexMinSize.setSizePolicy(sizePolicy)
+        sizePolicy.setHeightForWidth(self.doubleSpinBox_vortexMinSize.sizePolicy().hasHeightForWidth())
+        self.doubleSpinBox_vortexMinSize.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("AcadEref")
+        font.setFamily("SimSun-ExtB")
         font.setPointSize(-1)
-        self.spinBox_vortexMinSize.setFont(font)
-        self.spinBox_vortexMinSize.setStyleSheet("QSpinBox{\n"
+        self.doubleSpinBox_vortexMinSize.setFont(font)
+        self.doubleSpinBox_vortexMinSize.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.doubleSpinBox_vortexMinSize.setStyleSheet("QDoubleSpinBox{\n"
 "background:rgba(200, 200, 200,50);\n"
 "color:white;\n"
 "font-size: 24px;\n"
@@ -349,30 +350,29 @@ class Ui_Dialog(object):
 "border-radius: 3px;\n"
 "padding-right: 10px;}\n"
 "\n"
-"QSpinBox::down-button{\n"
+"QDoubleSpinBox::down-button{\n"
 "background:rgba(200, 200, 200,0);\n"
 "border-image: url(:/images/icons/botton_down.png);}\n"
-"QSpinBox::down-button::hover{\n"
+"QDoubleSpinBox::down-button::hover{\n"
 "background:rgba(200, 200, 200,100);\n"
 "border-image: url(:/images/icons/botton_down.png);}\n"
 "\n"
-"QSpinBox::up-button{\n"
+"QDoubleSpinBox::up-button{\n"
 "background:rgba(200, 200, 200,0);\n"
 "border-image: url(:/images/icons/botton_up.png);}\n"
-"QSpinBox::up-button::hover{\n"
+"QDoubleSpinBox::up-button::hover{\n"
 "background:rgba(200, 200, 200,100);\n"
 "border-image: url(:/images/icons/botton_up.png);}\n"
 "\n"
 "QAbstractSpinBox::up-button { subcontrol-origin: border; }\n"
 "QAbstractSpinBox::down-button { subcontrol-origin: border; }")
-        self.spinBox_vortexMinSize.setAlignment(QtCore.Qt.AlignCenter)
-        self.spinBox_vortexMinSize.setButtonSymbols(QtWidgets.QAbstractSpinBox.UpDownArrows)
-        self.spinBox_vortexMinSize.setMinimum(0)
-        self.spinBox_vortexMinSize.setMaximum(1000)
-        self.spinBox_vortexMinSize.setStepType(QtWidgets.QAbstractSpinBox.DefaultStepType)
-        self.spinBox_vortexMinSize.setProperty("value", 0)
-        self.spinBox_vortexMinSize.setObjectName("spinBox_vortexMinSize")
-        self.horizontalLayout_12.addWidget(self.spinBox_vortexMinSize)
+        self.doubleSpinBox_vortexMinSize.setAlignment(QtCore.Qt.AlignCenter)
+        self.doubleSpinBox_vortexMinSize.setButtonSymbols(QtWidgets.QAbstractSpinBox.UpDownArrows)
+        self.doubleSpinBox_vortexMinSize.setDecimals(2)
+        self.doubleSpinBox_vortexMinSize.setSingleStep(0.1)
+        self.doubleSpinBox_vortexMinSize.setProperty("value", 20.0)
+        self.doubleSpinBox_vortexMinSize.setObjectName("doubleSpinBox_vortexMinSize")
+        self.horizontalLayout_12.addWidget(self.doubleSpinBox_vortexMinSize)
         self.horizontalLayout_12.setStretch(0, 10)
         self.horizontalLayout_12.setStretch(1, 2)
         self.verticalLayout.addLayout(self.horizontalLayout_12)
@@ -380,6 +380,7 @@ class Ui_Dialog(object):
         self.verticalLayout.setStretch(1, 10)
         self.verticalLayout.setStretch(2, 10)
         self.verticalLayout.setStretch(3, 10)
+        self.verticalLayout.setStretch(4, 10)
         self.verticalLayout_4.addWidget(self.groupBox_8)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_4.addItem(spacerItem1)
