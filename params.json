@@ -17,7 +17,7 @@
     "confidence": 0.35,
     "iou": 0.45,
     "focus": -1,
-    "modbus": 1,
+    "modbus": 0,
     "scale": 3.5461,
     "vortex min size": 0,
     "ignore size": 30,

@@ -35,11 +35,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.camera_thread = CameraCaptureThread()          # 摄像头捕获线程
         self.display_thread = VideoVisualizationThread()
         self.modbus_thread = ModbusThread()                 # modbus通讯线程
-        self.showMaximized()
+        # self.showMaximized()
 
         self.time_ok = -1           # 记录没有检测到缺陷ok的时间，对应exist_object_time实现计时器效果
         self.time_ng = -1           # 对应exist_object_time
         self.time_interval = -1     # 对应object_interval_time
+        self.time_ok_flag = False   # 记录self.time_ok是否被初始化
         self.state = "waiting"                      # 三种状态：waiting,ng,ok
         self.start_waiting = 0                      # 不为0时一直处于waiting状态
         self.image = np.zeros((1, 1, 3), dtype=np.uint8)    # 用来存放ai检测后的图像
@@ -354,6 +355,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # NG的实现
             if contain_object and self.state != "waiting":  # NG状态
                 self.time_ok = -1
+                self.time_ok_flag = False
                 if self.time_ng == -1:
                     self.time_ng = time.time()
                 elif time.time() - self.time_ng > self.exist_object_time:           # 缺陷出现的实际时间大于指定的时间，提示报错
@@ -411,10 +413,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 elif self.existing_class != [] and time.time() - self.time_interval > self.object_interval_time:
                     # self.existing_id = []
                     self.existing_class = []
+                print("当前的状态", self.state)
                 self.time_ng = -1
-                if self.time_ok == -1:
+                if self.time_ok == -1 and not contain_object:
                     self.time_ok = time.time()
-                elif time.time() - self.time_ok > self.no_object_time:
+                    self.time_ok_flag = True
+                elif self.time_ok_flag and time.time() - self.time_ok > self.no_object_time:
                     self.label.setStyleSheet("background-color: rgb(0, 255, 0);")
                     self.label.setText("正常")
                     self.state = "ok"
@@ -561,7 +565,7 @@ class SettingsWindow(QDialog, Ui_Dialog):
         self.spinBox_timeForStopWarning.valueChanged.connect(lambda x: self.update_parameter(x, 'spinBox_timeForStopWarning'))
         self.spinBox_savePictureInterval.valueChanged.connect(lambda x: self.update_parameter(x, 'spinBox_savePictureInterval'))
         self.spinBox_timeForObjectIntervalTime.valueChanged.connect(lambda x: self.update_parameter(x, 'spinBox_timeForObjectIntervalTime'))
-        self.spinBox_vortexMinSize.valueChanged.connect(lambda x: self.update_parameter(x, 'spinBox_vortexMinSize'))
+        self.doubleSpinBox_vortexMinSize.valueChanged.connect(lambda x: self.update_parameter(x, 'doubleSpinBox_vortexMinSize'))
 
     def update_parameter(self, x, flag):
         # 滑块和计数器联动
@@ -592,7 +596,7 @@ class SettingsWindow(QDialog, Ui_Dialog):
             self.save_picture_inteval = x
         elif flag == 'spinBox_timeForObjectIntervalTime':
             self.object_interval_time = x
-        elif flag == 'spinBox_vortexMinSize':
+        elif flag == 'doubleSpinBox_vortexMinSize':
             self.vortex_min_size = x
 
     def set_parameters(self, save=False):
@@ -604,7 +608,7 @@ class SettingsWindow(QDialog, Ui_Dialog):
         self.spinBox_timeForStopWarning.setValue(self.no_object_time)
         self.spinBox_timeForObjectIntervalTime.setValue(self.object_interval_time)
         self.spinBox_savePictureInterval.setValue(self.save_picture_inteval)
-        self.spinBox_vortexMinSize.setValue(self.vortex_min_size)
+        self.doubleSpinBox_vortexMinSize.setValue(self.vortex_min_size)
         self.doubleSpinBox_conf.setValue(self.confidence)
         self.horizontalSlider_conf.setValue(int(self.confidence*100))
         self.doubleSpinBox_iou.setValue(self.iou)
