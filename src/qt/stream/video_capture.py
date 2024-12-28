@@ -35,14 +35,14 @@ class CameraCaptureThread(QThread):
     def set_start_config(self, ai_task, video_source=-1):
         self.threadFlag = True
         if video_source != -1:
-            self.get_video_source(video_source)
+            self.video_source = video_source
         self.ai_task = ai_task
         self.detected_object = get_param("detected object")
         self.video_path = get_param("save video path")         # 发现异常保存视频路径
         self.picture_path = get_param("save picture path")     # 启用每3s保存一张图片的路径
         self.save_picture_interval = get_param("save picture interval")
-        mkdir(self.video_path)
-        mkdir(self.picture_path)
+        os.makedirs(self.video_path, exist_ok=True)
+        os.makedirs(self.picture_path, exist_ok=True)
         # 每3s保存一张图片
         if self.ai_task in ["both", "save_picture"]:
             self.timer = QTimer(self)
@@ -52,13 +52,11 @@ class CameraCaptureThread(QThread):
             # timer.start()
             print("每3s保存一张图片开启！")
 
-    def get_video_source(self, video_source):
-        self.video_source = video_source
-
     def get_video_focus(self, focus):
         self.focus = focus
         try:
             if self.cap.isOpened():
+                print("设置焦距:", focus)
                 self.cap.set(cv.CAP_PROP_FOCUS, focus)
         except:
             print("更改焦距失败，无法读取到摄像头！")
@@ -85,7 +83,7 @@ class CameraCaptureThread(QThread):
         #         self.save_vedio = False
         #         self.time0 = -1
         # 创建视频
-        if self.threadFlag and  self.save_vedio and self.save_flag and self.VM.isOpened() is False and self.ai_task in ["both", "object_detection"]:
+        if self.threadFlag and self.save_vedio and self.save_flag and self.VM.isOpened() is False and self.ai_task in ["both", "object_detection"]:
             fourcc = cv.VideoWriter_fourcc(*"mp4v")  # 保存的格式
             # temp = self.video_path.split("/")
             # real_path = ""
@@ -112,12 +110,12 @@ class CameraCaptureThread(QThread):
 
     def run(self):
         try:
-            self.cap = cv.VideoCapture(self.video_source, cv.CAP_DSHOW)
+            self.cap = cv.VideoCapture(self.video_source)
         except:
             QtWidgets.QMessageBox.warning(None, "提示", "摄像头读取失败！")
 
         self.video_info = self.get_video_info(self.cap)
-        self.send_video_info.emit(self.video_info)
+        # self.send_video_info.emit(self.video_info)
 
         idx_frame = 0
         id = 0
@@ -136,14 +134,14 @@ class CameraCaptureThread(QThread):
                 time0 = time.time()
             id += 1
             # 视频保存
-            if self.ai_task in ["both", "object_detection"] and self.save_vedio:
-                # print("启用保存视频！")
-                self.start_save_video()
-                self.VM.write(self.frame)
-                cv.waitKey(1)
-            else:
-                if self.VM:
-                    self.VM.release()
+            # if self.ai_task in ["both", "object_detection"] and self.save_vedio:
+            #     # print("启用保存视频！")
+            #     self.start_save_video()
+            #     self.VM.write(self.frame)
+            #     cv.waitKey(1)
+            # else:
+            #     if self.VM:
+            #         self.VM.release()
             # 发送帧索引号和当前帧
             self.send_frame.emit(list([idx_frame, self.frame]))
             # print(idx_frame)

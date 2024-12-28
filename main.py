@@ -35,7 +35,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.camera_thread = CameraCaptureThread()          # 摄像头捕获线程
         self.display_thread = VideoVisualizationThread()
         self.modbus_thread = ModbusThread()                 # modbus通讯线程
-        # self.showMaximized()
+        self.showMaximized()
 
         self.time_ok = -1           # 记录没有检测到缺陷ok的时间，对应exist_object_time实现计时器效果
         self.time_ng = -1           # 对应exist_object_time
@@ -52,6 +52,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.error_picture_list = []                # 存放错误图片名称的列表
         self.start_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
         self.ignore_area_list = []           # 存放忽略区域列表，存放字典示例{"class":"vortex","center":[20,20]},忽略的类型和中心点
+        # self.video_source = "rtsp://192.168.1.168:554/ch01.264"    # 采用rtsp推流地址
+        self.video_source = 0   # 采用rtsp推流地址
 
         self.ai_output = []             # 存放ai输出结果，当忽略时使用
 
@@ -165,14 +167,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def process_camera(self):
         """ 判断摄像头是否可用，是则启动拍摄检测线程 """
-        video_source = 0
-        print("SOURCE", video_source)
+        print("SOURCE", self.video_source)
         # if video_source is not None and video_source != '':
-        if cv2.VideoCapture(video_source).isOpened():
+        if cv2.VideoCapture(self.video_source).isOpened():
             self.buttons_states("camera_on")
             self.ai_thread.set_start_config(ai_task=self.ai_task, model_name=self.model_name,
                                             confidence_threshold=self.conf_thr, iou_threshold=self.iou_thr)
-            self.camera_thread.set_start_config(video_source=video_source, ai_task=self.ai_task)
+            self.camera_thread.set_start_config(video_source=self.video_source, ai_task=self.ai_task)
             self.display_thread.set_start_config([self.label_display.width(), self.label_display.height()])
             if not self.ai_thread.isRunning():
                 self.ai_thread.start()
@@ -190,8 +191,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for i in range(5):      # 等待两秒，尝试五次识别摄像头
             cv2.waitKey(1000)
             print("摄像头识别中...")
-            if cv2.VideoCapture(0).isOpened():
-                ret, frame = cv2.VideoCapture(0).read()
+            if cv2.VideoCapture(self.video_source).isOpened():
+                ret, frame = cv2.VideoCapture(self.video_source).read()
                 if ret:
                     self.process_camera()
                     return

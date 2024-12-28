@@ -3,7 +3,7 @@
     "detected object": "person,chair",
     "detected task": "b",
     "model path": "./weights/detection",
-    "model name": "YOLOv8n",
+    "model name": "YOLO11n",
     "whether save video": 1,
     "save video object": "personabnormal",
     "save video path": "./save_video",
