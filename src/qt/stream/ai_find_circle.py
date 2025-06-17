@@ -18,7 +18,7 @@ class AiWorkerThread2(QThread):
     def __init__(self):
         super(AiWorkerThread2, self).__init__()
         self.thread_name = "AiWorkerThread"
-        self.threadFlag = False
+        # self.threadFlag = False
 
     def set_start_config(self, model_name="yolov8n_circle", confidence_threshold=0.35,
                          iou_threshold=0.45):
@@ -50,18 +50,6 @@ class AiWorkerThread2(QThread):
             confidence_threshold=self.confi_thr,
             iou_threshold=self.iou_thr)
 
-    # def _init_tracker(self):
-    #     if self.tracker_name == "deepsort":
-    #         self.tracker = DeepSort(
-    #             model_path=os.path.join(ROOT, f"weights/ckpt.t7"))
-    #     elif self.tracker_name == "bytetrack":
-    #         self.tracker = BYTETracker(
-    #             track_high_thresh=0.5,
-    #             track_low_thresh=0.1,
-    #             new_track_thresh=0.6,
-    #             match_thresh=0.8,
-    #             track_buffer=30,
-    #             frame_rate=30)
 
     def get_frame(self, frame_list):
         self.latest_frame.put(frame=frame_list[1], frame_id=frame_list[0], realtime=True)
@@ -87,6 +75,7 @@ class AiWorkerThread2(QThread):
 
             # self.model_output = add_image_id(model_output, frame_id)
             self.send_ai_output.emit(result)
+            print("图片传输完成！")
             cv2.waitKey(get_param("waitkey time"))  # 等待50ms，限制每s处理的帧数，避免占用过多cpu资源
 
     def get_model_output(self, frame, use_tracker=True):

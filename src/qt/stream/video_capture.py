@@ -8,9 +8,10 @@ import cv2 as cv
 import datetime
 import time
 import threading
+import shutil
+from datetime import datetime, timedelta
 
 from src.utils.general import get_param
-
 
 class CameraCaptureThread(QThread):
     send_video_info = pyqtSignal(dict)
@@ -19,10 +20,12 @@ class CameraCaptureThread(QThread):
 
     def __init__(self):
         super(CameraCaptureThread, self).__init__()
+
         self.thread_name = "CameraCaptureThread"
         self.threadFlag = False
         self.save_flag = not (get_param("whether save video") == 0)      # 是否启用保存标志位,当为0时不启用保存
         self.save_vedio = False     # 函数值判断是否保存视频
+        self.save_picture_days = get_param("save picture days")  # 保存图片的天数90
 
         self.video_info = []
         self.VM = cv.VideoWriter()          # 创建一个视频写入对象
@@ -36,6 +39,7 @@ class CameraCaptureThread(QThread):
         self.threadFlag = True
         if video_source != -1:
             self.video_source = video_source
+        # self.video_source = rtsp_url
         self.ai_task = ai_task
         self.detected_object = get_param("detected object")
         self.video_path = get_param("save video path")         # 发现异常保存视频路径
@@ -151,7 +155,7 @@ class CameraCaptureThread(QThread):
         self.cap.release()
         if self.VM:
             self.VM.release()
-        print("视频保存结束")
+            print("视频保存结束")
 
     def save_picture(self):
         # print("开始存图")
@@ -176,9 +180,37 @@ class CameraCaptureThread(QThread):
         try:
             cv.imwrite(h_dir + "/" + "Picture-{}.jpg".format(now_name), self.frame)
         except:
-            pass
+            print("保存图片失败！")
 
 
-def mkdir(path):#G-Dragon
+
+
+def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def delete_old_images(directory, days_threshold):
+    """
+    删除指定天数前的图片目录（按 YYYY-MM-DD 结构组织）
+    """
+    current_time = datetime.now()
+    cutoff_time = current_time - timedelta(days=days_threshold)
+
+    for dir_name in os.listdir(directory):
+        dir_path = os.path.join(directory, dir_name)
+
+        if not os.path.isdir(dir_path):
+            continue
+
+        try:
+            dir_date = datetime.strptime(dir_name, "%Y-%m-%d")
+        except ValueError:
+            continue
+
+        if dir_date < cutoff_time:
+            try:
+                shutil.rmtree(dir_path)
+                print(f"已删除过期目录: {dir_path}")
+            except Exception as e:
+                print(f"删除目录失败: {dir_path}, 错误: {e}")

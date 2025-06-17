@@ -22,5 +22,7 @@
     "vortex min size": 0,
     "ignore size": 30,
     "modbus_ip": "192.168.1.30",
-    "modbus_port": 502
+    "modbus_port": 502,
+    "auto_modbus_ip": 1,
+    "save picture days": 90
 }

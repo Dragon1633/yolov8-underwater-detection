@@ -7,12 +7,14 @@ import sys
 import json
 import numpy as np
 import pandas as pd
+import subprocess
 
 from src.qt.stream.video_capture import CameraCaptureThread
 from src.qt.stream.visualize import VideoVisualizationThread
 from src.qt.stream.ai_worker import AiWorkerThread
 from src.qt.stream.ai_find_circle import AiWorkerThread2
 from src.qt.stream.modbus import ModbusThread
+from src.qt.stream.floder_clean_up import CleanupThread
 
 from src.ui.main_window_end import Ui_MainWindow
 from src.ui.menu_setting import Ui_Dialog
@@ -22,11 +24,67 @@ from PyQt5.QtWidgets import QDialog, QMessageBox, QFileDialog, QLabel
 from PyQt5.QtGui import QImage, QPixmap, QPen, QColor, QPainter
 from PyQt5.QtCore import Qt, pyqtSignal, QPoint
 
+video_source = 0
+cap = cv2.VideoCapture(video_source)
+ret, _ = cap.read()
+if not ret:
+    video_source = "rtsp://192.168.1.168:554/ch01.264"
+del cap, ret
+
+
+def get_ipv4_addresses():
+    """获取本机IPv4地址列表，适用于Windows系统。目的：自动配置modbus的IP地址"""
+    try:
+        # 执行ipconfig命令并捕获输出
+        result = subprocess.check_output(
+            'ipconfig',
+            shell=True,
+            stderr=subprocess.STDOUT,
+            text=True,  # Python 3.7+可用
+            encoding='cp936'  # Windows中文系统编码
+        )
+
+        # 提取所有IPv4地址
+        ip_addresses = []
+        for line in result.splitlines():
+            if "IPv4" in line and "地址" in line:  # 适配中文系统
+                # 提取冒号后的IP地址部分
+                ip = line.split(':')[-1].strip()
+                if ip:  # 确保不是空字符串
+                    ip_addresses.append(ip)
+
+        return ip_addresses
+
+    except subprocess.CalledProcessError as e:
+        print(f"命令执行失败: {e.output}")
+        return []
+    except FileNotFoundError:
+        print("未找到ipconfig命令，请确保在Windows系统中运行")
+        return []
+
+
+def get_modbus_ip():
+    """电脑上只有两个IP地址：水下相机和modbus通讯，自动返回modbus的IP地址"""
+    ip_list = get_ipv4_addresses()
+    with open('log_ip.txt', 'a') as file:
+        file.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\t' + "获取到的IP地址：" + str(ip_list) + '\n')
+    if isinstance(video_source, int):
+        return "0"
+    cam_ip = video_source[7:17]     # 192.168.1.  水下相机的IP地址前三位
+    for ip in ip_list:
+        if cam_ip in ip:
+            ip_list.remove(ip)  # 删除水下相机的IP地址
+
+    if len(ip_list) == 1:
+        with open('log_ip.txt', 'a') as file:
+            file.write(time.strftime("唯一的modbus IP地址：" + str(ip_list[0]) + '\n'))
+        return str(ip_list[0])  # 返回唯一的modbus IP地址
+    return "0"
+
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     send_ignore_area_list = pyqtSignal(list)
     send_whether_save_video = pyqtSignal(bool)
-
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -35,6 +93,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.camera_thread = CameraCaptureThread()          # 摄像头捕获线程
         self.display_thread = VideoVisualizationThread()
         self.modbus_thread = ModbusThread()                 # modbus通讯线程
+        self.cleanup_thread = CleanupThread("./save_picture")               # 清理线程
         self.showMaximized()
 
         self.time_ok = -1           # 记录没有检测到缺陷ok的时间，对应exist_object_time实现计时器效果
@@ -52,9 +111,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.error_picture_list = []                # 存放错误图片名称的列表
         self.start_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
         self.ignore_area_list = []           # 存放忽略区域列表，存放字典示例{"class":"vortex","center":[20,20]},忽略的类型和中心点
-        # self.video_source = "rtsp://192.168.1.168:554/ch01.264"    # 采用rtsp推流地址
-        self.video_source = 0   # 采用rtsp推流地址
-
+        self.video_source = video_source    # 采用rtsp推流地址
         self.ai_output = []             # 存放ai输出结果，当忽略时使用
 
         self.get_para()                         # 获取json文件参数
@@ -66,13 +123,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             file.write(now + '\t' + "软件打开" + '\n')
 
     def init_slots(self):
-        self.pushButton_cam.clicked.connect(self.process_camera)
         self.pushButton_stopWarning.clicked.connect(self.stop_warning)          # 停止报警按钮，报警时点击按钮可以停止报警，正常后会自动恢复检测状态
         self.pushButton_stopWarning_2.clicked.connect(self.set_waiting_state)   # 挂起按钮，点击后设置为waiting状态,报警器一直处于黄灯，再次点击按钮可以恢复检测状态
         self.pushButton_outputExcel.clicked.connect(self.output_excel)
         self.pushButton_clear.clicked.connect(self.clear_ignore_area_list)
-        self.pushButton_setting.clicked.connect(self.open_setting)
-        self.menu_sizeCalibration.triggered.connect(self.open_menu1)
+        self.menu_setting.triggered.connect(self.open_setting)
+        self.menu_sizeCalibration.triggered.connect(self.open_size_calibration)
         # 信号的绑定
         self.camera_thread.send_frame.connect(self.display_thread.get_fresh_frame)
         self.camera_thread.send_frame.connect(self.ai_thread.get_frame)
@@ -85,11 +141,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.display_thread.send_displayable_frame.connect(self.update_display_frame)
         self.display_thread.send_ai_output.connect(self.update_statistic_table)
-        # 滑块和计数器联动
-        self.spinBox_focus.valueChanged.connect(lambda x: self.update_parameter(x, 'SpinBox_focus'))
-        self.horizontalSlider_focus.valueChanged.connect(lambda x: self.update_parameter(x, 'horizontalSlider_focus'))
         # 点击标签打开对应的缺陷图片
         self.tableWidget_results.cellClicked.connect(self.open_table_picture)
+        # 清理线程启动
+        self.cleanup_thread.start()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -101,6 +156,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.display_thread.stop_display()
             self.ai_thread.stop_process()
             self.camera_thread.stop_capture()
+            self.cleanup_thread.stop()
             if self.modbus_whether_on:
                 self.modbus_thread.stop_output_state()
         now = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
@@ -126,6 +182,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.save_flag = not (p["whether save video"] == 0)     # 是否保存视频
         self.save_video_object = p["save video object"]         # 检测到指定类型的缺陷时保存视频
         self.ignore_area_size = p["ignore size"]  # 控制忽略区域大小，正方形的边长的一半
+        self.auto_modbus_ip = p["auto_modbus_ip"]   #是否自动配置modbus的ip
+        if self.auto_modbus_ip:
+            self.init_ip()
         # 更改ai线程的部分参数
         if self.ai_thread.isRunning():
             self.ai_thread.set_confidence_threshold(self.conf_thr)
@@ -141,21 +200,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.modbus_thread.start()
                 print("启动modbus线程成功")
 
+    def init_ip(self):
+        self.ip = get_modbus_ip()
+        if self.ip == "0":
+            QMessageBox.warning(self, "警告", "检测到多个ip地址，请手动设置modbus的IP地址！(或者采用网络摄像头请忽视)", QMessageBox.Ok)
+        if self.ip.startswith("192.168."):      #再次验证
+            para.set_param({"modbus_ip": self.ip})
+            with open('log_ip.txt', 'a') as file:
+                file.write("ip更改成功")
+            return
+
+        with open('log_ip.txt', 'a') as file:
+            file.write("未更改ip")
+
     def open_setting(self):
         """打开设置窗口"""
         set_menu = SettingsWindow()
         set_menu.signal.connect(self.get_para)          # 重新加载参数
         set_menu.show()
 
-    def open_menu1(self):
+    def open_size_calibration(self):
         """打开菜单1"""
         # self.ai_thread.stop_process()
         # self.display_thread.stop_display()
         # if self.modbus_whether_on:
         #     self.modbus_thread.stop_output_state()
+        # 清理旧资源
+        if hasattr(self, 'menu1'):
+            self.menu1.close()  # 确保释放资源
+            del self.menu1
         self.menu1 = Menu1(self.image)
+
         self.camera_thread.send_frame.connect(self.menu1.get_ori_frame)
-        # self.camera_thread.send_frame.connect(self.menu1.ai_find_circle.get_frame)  # ai检测用
+        self.camera_thread.send_frame.connect(self.menu1.ai_find_circle.get_frame)  # ai检测用
         # 暂停主线程的检测，减少内存占用
         if self.ai_thread.isRunning():
             self.ai_thread.pause_continue_process()
@@ -170,7 +247,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print("SOURCE", self.video_source)
         # if video_source is not None and video_source != '':
         if cv2.VideoCapture(self.video_source).isOpened():
-            self.buttons_states("camera_on")
             self.ai_thread.set_start_config(ai_task=self.ai_task, model_name=self.model_name,
                                             confidence_threshold=self.conf_thr, iou_threshold=self.iou_thr)
             self.camera_thread.set_start_config(video_source=self.video_source, ai_task=self.ai_task)
@@ -197,7 +273,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.process_camera()
                     return
         # QMessageBox.warning(self, "提示", "摄像头断开连接！", QMessageBox.Ok)
-        self.buttons_states("camera_off")
 
     def update_parameter(self, x, flag):  # 滑块和计数器联动
         if flag == 'SpinBox_focus':
@@ -219,16 +294,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return "both"
         elif task in ["none", "nothing", "n", ""]:
             return "none"
-
-    def buttons_states(self, work_state):       # 根据工作状况 设置按钮状态
-        if work_state == "camera_on":
-            self.pushButton_cam.setDisabled(True)
-            self.horizontalSlider_focus.setDisabled(False)
-            self.spinBox_focus.setDisabled(False)
-        elif work_state == "camera_off":
-            self.pushButton_cam.setDisabled(False)
-            self.horizontalSlider_focus.setDisabled(True)
-            self.spinBox_focus.setDisabled(True)
 
     def stop_warning(self):
         if self.state == "ng":
@@ -414,7 +479,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 elif self.existing_class != [] and time.time() - self.time_interval > self.object_interval_time:
                     # self.existing_id = []
                     self.existing_class = []
-                print("当前的状态", self.state)
+                # print("当前的状态", self.state)
                 self.time_ng = -1
                 if self.time_ok == -1 and not contain_object:
                     self.time_ok = time.time()
@@ -713,8 +778,10 @@ class Menu1(QDialog, Ui_Menu1):
         self.threadFlag = True
         self.r = 0
         self.model_name = "yolov8n_circle"
+        self.idx_frame = 0
         self.mode = "auto"      # auto,manual
         self.ai_find_circle = AiWorkerThread2()
+
         # 保存原来的 label_showPicture 控件
         self.original_label_showPicture = self.findChild(QLabel, "label_showPicture")
         # 创建自定义的 ImageLabel 控件
@@ -740,22 +807,23 @@ class Menu1(QDialog, Ui_Menu1):
         # self.pushButton_loadPicture.clicked.connect(self.loadPicture)
         self.pushButton_calibration.clicked.connect(self.calibration)
         self.pushButton_changemode.clicked.connect(self.change_mode)
-        self.ai_find_circle.send_ai_output.connect(self.get_frame)
+        self.ai_find_circle.send_ai_output.connect(self.get_results)
         self.manual_label_showPicture.send_r.connect(self.change_det_r)
-        # self.camera.send_frame.connect(self.get_frame)
+        # self.camera.send_frame.connect(self.get_results)
         self.label_scale.setText(str(self.scale))
         # 展示主窗口传递过来的图片
-        if self.img.shape[0] != 1:
-            if not cv2.VideoCapture(0).isOpened():
-                print("展示图片1——传递", self.img.shape)
+        # if self.img.shape[0] != 1:
+        #     if not cv2.VideoCapture(0).isOpened():
+        #         print("展示图片1——传递", self.img.shape)
                 # self.ai_find_circle.get_model_output(self.img)
         # 初始化ai检测圆的线程并启动
         self.ai_find_circle.set_start_config(model_name=self.model_name)
-        if cv2.VideoCapture(0).isOpened():
+        if cv2.VideoCapture(video_source).isOpened():
             self.ai_find_circle.start()
             print("Menu1圆检测线程启动")
 
     def get_k(self):
+        """计算比例尺"""
         height, width = self.img.shape[:2]
         if height != 1:
             w = self.label_showPicture.width()
@@ -766,25 +834,34 @@ class Menu1(QDialog, Ui_Menu1):
                 return width / w
 
     def change_det_r(self, r):
+        """ 更新检测到的圆的半径 """
         self.r = r
         if self.r != 0:
             self.label_lengthPixel.setText(str(round(self.r * self.k*2, 1)))
 
-    def get_frame(self, result):
-        """ 获取图片 """
+    def get_results(self, result):
+        """ 获取并显示ai处理后的图片 """
+        print("ai自动检测获得图片")
         if self.threadFlag:
             img = result[1]
             self.change_det_r(result[0])
-            self.label_showPicture.setScaledContents(True)
             qImg = self.cvToQImage(self.showPicture(img, self.label_showPicture.height(),
                                                     self.label_showPicture.width()))  # np转为QImage图像格式
-            self.label_showPicture.setPixmap(QPixmap.fromImage(qImg))
+            # self.label_showPicture.setScaledContents(True)
+            # self.label_showPicture.setPixmap(QPixmap.fromImage(qImg))
+            self.original_label_showPicture.setScaledContents(True)
+            self.original_label_showPicture.setPixmap(QPixmap.fromImage(qImg))
+            print("显示图片完毕！！！！！！")
 
     def get_ori_frame(self, frame):
+        """ 获取原始图片 """
         if self.mode == "auto":
-            if self.ai_find_circle.isRunning():
-                self.ai_find_circle.get_frame(frame)
-                # self.ai_find_circle.send_ai_output.connect(self.get_frame)
+            # self.idx_frame += 1
+            # self.ai_find_circle.get_frame(list([(self.idx_frame, frame)]))
+            pass
+            # if self.ai_find_circle.isRunning():
+            #     self.ai_find_circle.get_results(frame)
+                # self.ai_find_circle.send_ai_output.connect(self.get_results)
         else:
             self.manual_label_showPicture.set_image(frame[1])
 
@@ -800,11 +877,12 @@ class Menu1(QDialog, Ui_Menu1):
             self.mode = "auto"
             self.restore_original_label()
             self.ai_find_circle.set_start_config(model_name=self.model_name)
-            if cv2.VideoCapture(0).isOpened():
+            if cv2.VideoCapture(video_source).isOpened():
                 self.ai_find_circle.start()
             self.label_mode.setText("自动")
 
     def manual_draw_circle(self):
+        """切换到手动标注圆模式"""
         # 使用布局替换原来的控件
         self.layout().replaceWidget(self.original_label_showPicture, self.manual_label_showPicture)
         # 删除原来的 label_showPicture 控件
@@ -919,18 +997,18 @@ class Menu1(QDialog, Ui_Menu1):
                 painter.end()
 
         def draw_arrowhead(self, painter, p1, p2):
-            """Draw an arrowhead pointing from p1 to p2."""
+            """绘制一个从 p1 到 p2 的箭头。"""
             angle = math.atan2(p2.y() - p1.y(), p2.x() - p1.x())
             arrow_size = 10
 
             # Calculate the points of the arrowhead
             p1_arrow = QPoint(
-                p2.x() - arrow_size * math.cos(angle - math.pi / 6),
-                p2.y() - arrow_size * math.sin(angle - math.pi / 6)
+                int(p2.x() - arrow_size * math.cos(angle - math.pi / 6)),
+                int(p2.y() - arrow_size * math.sin(angle - math.pi / 6))
             )
             p2_arrow = QPoint(
-                p2.x() - arrow_size * math.cos(angle + math.pi / 6),
-                p2.y() - arrow_size * math.sin(angle + math.pi / 6)
+                int(p2.x() - arrow_size * math.cos(angle + math.pi / 6)),
+                int(p2.y() - arrow_size * math.sin(angle + math.pi / 6))
             )
 
             # Draw the arrowhead
@@ -1075,6 +1153,8 @@ class ParamSave(object):
                            "ignore size": 30,
                            "modbus_ip": "192.168.1.30",
                            "modbus_port": 502,
+                           "auto_modbus_ip":1,        # 是否自动配置modbus的ip地址，0不自动
+                           "save picture days": 90  # 保存图片的天数，超过天数自动删除
                            }
         # 不存在json文件自动创建并初始化
         if not os.path.exists(self.file_name):

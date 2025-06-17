@@ -48,7 +48,7 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.comboBox.sizePolicy().hasHeightForWidth())
         self.comboBox.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         font.setBold(False)
         font.setWeight(50)
         self.comboBox.setFont(font)
@@ -120,7 +120,7 @@ class Ui_Dialog(object):
         self.spinBox_timeForStartWarning.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("AcadEref")
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         self.spinBox_timeForStartWarning.setFont(font)
         self.spinBox_timeForStartWarning.setStyleSheet("QSpinBox{\n"
 "background:rgba(200, 200, 200,50);\n"
@@ -174,7 +174,7 @@ class Ui_Dialog(object):
         self.spinBox_timeForStopWarning.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("AcadEref")
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         self.spinBox_timeForStopWarning.setFont(font)
         self.spinBox_timeForStopWarning.setStyleSheet("QSpinBox{\n"
 "background:rgba(200, 200, 200,50);\n"
@@ -228,7 +228,7 @@ class Ui_Dialog(object):
         self.spinBox_savePictureInterval.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("AcadEref")
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         self.spinBox_savePictureInterval.setFont(font)
         self.spinBox_savePictureInterval.setStyleSheet("QSpinBox{\n"
 "background:rgba(200, 200, 200,50);\n"
@@ -282,7 +282,7 @@ class Ui_Dialog(object):
         self.spinBox_timeForObjectIntervalTime.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("AcadEref")
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         self.spinBox_timeForObjectIntervalTime.setFont(font)
         self.spinBox_timeForObjectIntervalTime.setStyleSheet("QSpinBox{\n"
 "background:rgba(200, 200, 200,50);\n"
@@ -337,7 +337,7 @@ class Ui_Dialog(object):
         self.doubleSpinBox_vortexMinSize.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("SimSun-ExtB")
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         self.doubleSpinBox_vortexMinSize.setFont(font)
         self.doubleSpinBox_vortexMinSize.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.doubleSpinBox_vortexMinSize.setStyleSheet("QDoubleSpinBox{\n"
@@ -698,7 +698,7 @@ class Ui_Dialog(object):
         self.spinBox_interval.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("AcadEref")
-        font.setPointSize(-1)
+        #font.setPointSize(-1)
         self.spinBox_interval.setFont(font)
         self.spinBox_interval.setStyleSheet("QSpinBox{\n"
 "background:rgba(200, 200, 200,50);\n"
