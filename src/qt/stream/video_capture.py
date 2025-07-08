@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from src.utils.general import get_param
 
 class CameraCaptureThread(QThread):
+    """实际采图线程"""
     send_video_info = pyqtSignal(dict)
     send_frame = pyqtSignal(list)       # 发送帧信号
     send_cameraIsOpen = pyqtSignal()    # 当摄像头断开时发送信号
@@ -182,6 +183,31 @@ class CameraCaptureThread(QThread):
         except:
             print("保存图片失败！")
 
+
+class CameraThread(QThread):
+    """该线程为了判断相机能够打开，解决rtsp推流相机未连接，自动延时30s，程序卡死的问题"""
+    # 定义信号：打开成功、打开失败、帧数据可用
+    opened = pyqtSignal()
+    def __init__(self, video_source, parent=None):
+        super().__init__(parent)
+        self.video_source = video_source
+        self.cap = None
+        self.running = True
+
+    def run(self):
+        # 尝试打开摄像头
+        self.cap = cv2.VideoCapture(self.video_source)
+
+        if not self.cap.isOpened():
+            return
+
+        # 打开成功，发出信号
+        self.opened.emit()
+
+    def stop(self):
+        self.wait(1000)  # 等待线程结束，最多1秒
+        if self.cap and self.cap.isOpened():
+            self.cap.release()
 
 
 

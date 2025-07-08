@@ -10,6 +10,7 @@ import pandas as pd
 import subprocess
 
 from src.qt.stream.video_capture import CameraCaptureThread
+from src.qt.stream.video_capture import CameraThread
 from src.qt.stream.visualize import VideoVisualizationThread
 from src.qt.stream.ai_worker import AiWorkerThread
 from src.qt.stream.ai_find_circle import AiWorkerThread2
@@ -22,7 +23,7 @@ from src.ui.menu1 import Ui_Menu1
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import QDialog, QMessageBox, QFileDialog, QLabel
 from PyQt5.QtGui import QImage, QPixmap, QPen, QColor, QPainter
-from PyQt5.QtCore import Qt, pyqtSignal, QPoint
+from PyQt5.QtCore import Qt, pyqtSignal, QPoint, QTimer
 
 video_source = 0
 cap = cv2.VideoCapture(video_source)
@@ -30,6 +31,7 @@ ret, _ = cap.read()
 if not ret:
     video_source = "rtsp://192.168.1.168:554/ch01.264"
 del cap, ret
+# video_source = "rtsp://192.168.1.168:554/ch01.264"
 
 
 def get_ipv4_addresses():
@@ -113,9 +115,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ignore_area_list = []           # 存放忽略区域列表，存放字典示例{"class":"vortex","center":[20,20]},忽略的类型和中心点
         self.video_source = video_source    # 采用rtsp推流地址
         self.ai_output = []             # 存放ai输出结果，当忽略时使用
+        self.timer = QTimer()           # 定时器，用于摄像头打开超时
 
         self.get_para()                         # 获取json文件参数
         self.init_slots()
+
+        self.cam_whe_useful_thread = CameraThread(self.video_source)  # 判断相机是否可以打开线程
         self.process_camera()                   # 打开摄像头
         # 创建一个log.txt文件记录软件正常打开和关闭
         now = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
@@ -245,33 +250,53 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def process_camera(self):
         """ 判断摄像头是否可用，是则启动拍摄检测线程 """
         print("SOURCE", self.video_source)
-        # if video_source is not None and video_source != '':
-        if cv2.VideoCapture(self.video_source).isOpened():
-            self.ai_thread.set_start_config(ai_task=self.ai_task, model_name=self.model_name,
-                                            confidence_threshold=self.conf_thr, iou_threshold=self.iou_thr)
-            self.camera_thread.set_start_config(video_source=self.video_source, ai_task=self.ai_task)
-            self.display_thread.set_start_config([self.label_display.width(), self.label_display.height()])
-            if not self.ai_thread.isRunning():
-                self.ai_thread.start()
-                self.display_thread.start()
-                self.camera_thread.start()
-                # 是否启用modbus模块
-                if self.modbus_whether_on:
-                    self.modbus_thread.set_start_config(self.ai_task)
-                    self.modbus_thread.start()
+        self.label_display.setText('<font color="white">正在尝试连接摄像头...</font>')
+        self.label_display.setAlignment(Qt.AlignCenter)
+        if self.timer.isActive():
+            pass
         else:
-            QMessageBox.warning(self, "警告", "摄像头未连接或无法打开")
+            # 创建并启动摄像头线程
+            self.cam_whe_useful_thread.opened.connect(self.start_thread)
+            # 超时定时器
+            self.timer.setSingleShot(True)
+            self.timer.timeout.connect(self.on_timeout)
+            self.timer.start(5000)  # 5秒超时
+            self.cam_whe_useful_thread.start()
+
+    def start_thread(self):
+        self.timer.stop()
+        # if video_source is not None and video_source != '':
+        # if cv2.VideoCapture(self.video_source).isOpened():
+        self.ai_thread.set_start_config(ai_task=self.ai_task, model_name=self.model_name,
+                                        confidence_threshold=self.conf_thr, iou_threshold=self.iou_thr)
+        self.camera_thread.set_start_config(video_source=self.video_source, ai_task=self.ai_task)
+        self.display_thread.set_start_config([self.label_display.width(), self.label_display.height()])
+        if not self.ai_thread.isRunning():
+            self.ai_thread.start()
+            self.display_thread.start()
+            self.camera_thread.start()
+            # 是否启用modbus模块
+            if self.modbus_whether_on:
+                self.modbus_thread.set_start_config(self.ai_task)
+                self.modbus_thread.start()
+
+    def on_timeout(self):
+        self.timer.stop()
+        print("摄像头打开失败，5秒内未响应！")
+        self.label_display.setText('<font color="white">连接摄像头失败，请检查接线并重启软件...</font>')
+        QMessageBox.warning(self, "警告", "摄像头未连接或无法打开")
 
     def reopen_camera(self):
         """ 重新打开摄像头 """
-        for i in range(5):      # 等待两秒，尝试五次识别摄像头
-            cv2.waitKey(1000)
-            print("摄像头识别中...")
-            if cv2.VideoCapture(self.video_source).isOpened():
-                ret, frame = cv2.VideoCapture(self.video_source).read()
-                if ret:
-                    self.process_camera()
-                    return
+        self.process_camera()
+        # for i in range(5):      # 等待两秒，尝试五次识别摄像头
+        #     cv2.waitKey(1000)
+        #     print("摄像头识别中...")
+        #     if cv2.VideoCapture(self.video_source).isOpened():
+        #         ret, frame = cv2.VideoCapture(self.video_source).read()
+        #         if ret:
+        #             self.process_camera()
+        #             return
         # QMessageBox.warning(self, "提示", "摄像头断开连接！", QMessageBox.Ok)
 
     def update_parameter(self, x, flag):  # 滑块和计数器联动
@@ -1189,6 +1214,8 @@ class ParamSave(object):
         for k, v in self.param_kw.items():
             if k in set_dict.keys():
                 self.param_kw[k] = set_dict[k]
+
+
 
 
 def mkdir(path):

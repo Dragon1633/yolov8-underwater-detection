@@ -17,12 +17,12 @@
     "confidence": 0.35,
     "iou": 0.45,
     "focus": -1,
-    "modbus": 0,
+    "modbus": 1,
     "scale": 3.5461,
     "vortex min size": 0,
     "ignore size": 30,
-    "modbus_ip": "192.168.1.30",
+    "modbus_ip": "192.168.0.30",
     "modbus_port": 502,
-    "auto_modbus_ip": 1,
+    "auto_modbus_ip": 0,
     "save picture days": 90
 }
