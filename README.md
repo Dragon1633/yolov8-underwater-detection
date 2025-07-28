@@ -25,3 +25,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## 打包
+使用PyInstaller打包：
+
+```shell
+pyinstaller -w main.py --icon="icon.ico" --exclude-module PyQt6 --exclude-module PySide2 -y 
+```

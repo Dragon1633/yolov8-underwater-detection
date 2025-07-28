@@ -172,6 +172,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """获取json文件参数"""
         p = para.load()
         self.detected_object = p["detected object"]  # 检测的目标名称
+        self.warning_object = p["warning object"]   # 报警的目标名称,目的是检测记录但不报警-旋涡情况太多
         self.conf_thr = p["confidence"]  # 置信度阈值
         self.iou_thr = p["iou"]  # IOU
         self.focus = p["focus"]  # 焦距
@@ -186,7 +187,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.vortex_min_size = p["vortex min size"]
         self.save_flag = not (p["whether save video"] == 0)     # 是否保存视频
         self.save_video_object = p["save video object"]         # 检测到指定类型的缺陷时保存视频
-        self.ignore_area_size = p["ignore size"]  # 控制忽略区域大小，正方形的边长的一半
+        self.ignore_area_size = p["ignore size"]    # 控制忽略区域大小，正方形的边长的一半
         self.auto_modbus_ip = p["auto_modbus_ip"]   #是否自动配置modbus的ip
         if self.auto_modbus_ip:
             self.init_ip()
@@ -204,6 +205,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.modbus_thread.set_start_config(self.ai_task)
                 self.modbus_thread.start()
                 print("启动modbus线程成功")
+        mkdir(self.save_error_path)
 
     def init_ip(self):
         self.ip = get_modbus_ip()
@@ -415,23 +417,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget_ignore.removeRow(0)
 
     def update_display_frame(self, image):
+        """ 更新显示的图像"""
         self.image = image.copy()
         image = self.draw_transparency_square(image)    # 绘制忽略区域
         showImage = self.cvToQImage(self.showPicture(image, self.label_display.height(), self.label_display.width()))
         self.label_display.setPixmap(QtGui.QPixmap.fromImage(showImage))
 
     def clean_table(self):
+        """清空表格"""
         while self.tableWidget_results.rowCount() > 0:
             self.tableWidget_results.removeRow(0)
 
     def class_to_chinese(self, name):
         """ 将类别名转换为中文 """
-        if name == "vortex":
+        if name in "vortex":
             class_name = "旋涡"
         elif name == "abnormal":
             class_name = "异常出丝"
         elif name == "oil":
             class_name = "油污"
+        elif name == "person":
+            class_name = "人"
         else:
             class_name = str(name)
         return class_name
@@ -441,7 +447,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # ai_output内容"bbox"格式[x1,y1,x2,y2]左上右下角坐标,"class","confidence","id"...
         self.ai_output = ai_output
         tem = 0
-        if self.start_waiting == 0:
+        if self.start_waiting == 0:     # 是否挂起
             contain_object = any(item.get('class') in self.detected_object for item in ai_output)
             # NG的实现
             if contain_object and self.state != "waiting":  # NG状态
@@ -450,16 +456,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.time_ng == -1:
                     self.time_ng = time.time()
                 elif time.time() - self.time_ng > self.exist_object_time:           # 缺陷出现的实际时间大于指定的时间，提示报错
-                    self.label.setStyleSheet("background-color: rgb(255, 0, 0);")
-                    self.label.setText("报错")
-                    self.state = "ng"
-                    if self.modbus_whether_on:
-                        self.modbus_thread.get_state("ng")      # 传递modbus状态
-                    whether_save_video = any(item.get('class') in self.save_video_object for item in ai_output)
-                    if self.save_flag and whether_save_video:
-                        self.send_whether_save_video.emit(True)
-                    else:
-                        self.send_whether_save_video.emit(False)
                     # 输出检测结果信息
                     current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                     for box in ai_output:
@@ -468,7 +464,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             class_name = self.class_to_chinese(box["class"])
                             each_item = [str(self.index), class_name, "{:.1f}%".format(box["confidence"] * 100),
                                          str(current_time)]
-
                             if box["class"] not in self.existing_class:     # 判断是否是第一次出现，避免重复输出
                                 self.time_interval = -1
                                 # if tem == 0:
@@ -492,6 +487,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.label_display_2.setPixmap(QtGui.QPixmap.fromImage(showImage))
 
                     if tem == 1:
+                        self.process_ng(ai_output)  # 处理NG状态
                         if self.save_error_path != "":  # 不为空时保存NG图片
                             picture_name = "ERROR" + current_time.replace(" ", "_").replace(":", "_") + ".jpg"
                             self.error_picture_list.append(picture_name)
@@ -517,7 +513,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.modbus_thread.get_state("ok")
                     self.send_whether_save_video.emit(False)
 
+    def process_ng(self, ai_output):
+        for box in ai_output:
+            if box["class"] in self.warning_object:     #只针对报警的目标进行报警处理
+                self.label.setStyleSheet("background-color: rgb(255, 0, 0);")
+                self.label.setText("报错")
+                self.state = "ng"
+                if self.modbus_whether_on:
+                    self.modbus_thread.get_state("ng")  # 传递modbus状态
+        whether_save_video = any(item.get('class') in self.save_video_object for item in ai_output)
+        if self.save_flag and whether_save_video:
+            self.send_whether_save_video.emit(True)
+        else:
+            self.send_whether_save_video.emit(False)
+
     def update_ignore_table(self, class_name, center):
+        """ 更新忽略区域表格 """
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         each_item = [str(self.ignore_index), class_name, str(center), current_time]
         self.ignore_index += 1
@@ -532,6 +543,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget_ignore.verticalScrollBar().maximum())
 
     def open_table_picture(self, row):
+        """ 打开表格中选中的图片 """
         # print("选中的列为：", row)
         if self.save_error_path != "":
             if row < len(self.error_picture_list):
@@ -617,6 +629,7 @@ class SettingsWindow(QDialog, Ui_Dialog):
     def get_parameter(self):
         """ 获取json文件的参数 """
         parameters = para.param_kw
+        self.warning_object = parameters["warning object"]  # 报警的目标名称
         self.detected_task = parameters["detected task"]
         self.whether_save_video = parameters["whether save video"]          # 是否保存视频
         self.save_video_object = parameters["save video object"]            # 什么缺陷出来时保存视频
@@ -642,6 +655,9 @@ class SettingsWindow(QDialog, Ui_Dialog):
         self.radioButton_abnormal.clicked.connect(lambda x: self.set_function("abnormal"))
         self.radioButton_vortex.clicked.connect(lambda x: self.set_function("vortex"))
         self.radioButton_oil.clicked.connect(lambda x: self.set_function("oil"))
+        self.radioButton_abnormal_warning.clicked.connect(lambda x: self.set_function("abnormal_warning"))
+        self.radioButton_vortex_warning.clicked.connect(lambda x: self.set_function("vortex_warning"))
+        self.radioButton_oil_warning.clicked.connect(lambda x: self.set_function("oil_warning"))
         # 模式选择
         self.comboBox.currentIndexChanged.connect(lambda x: self.set_function("mode"))
         # 滑块和计数器联动
@@ -706,13 +722,17 @@ class SettingsWindow(QDialog, Ui_Dialog):
         self.horizontalSlider_iou.setValue(int(self.iou*100))
         self.spinBox_interval.setValue(self.waitkey_time)
         self.horizontalSlider_interval.setValue(self.waitkey_time)
-        #
+
         self.radioButton_abnormal.setChecked("abnormal" in self.save_video_object)
         self.radioButton_vortex.setChecked("vortex" in self.save_video_object)
         self.radioButton_oil.setChecked("oil" in self.save_video_object)
+        self.radioButton_abnormal_warning.setChecked("abnormal" in self.warning_object)
+        self.radioButton_vortex_warning.setChecked("vortex" in self.warning_object)
+        self.radioButton_oil_warning.setChecked("oil" in self.warning_object)
         # 保存参数
         if save:
             para.set_param({
+                "warning object": self.warning_object,
                 "detected task": self.detected_task,
                 "whether save video": self.whether_save_video,
                 "save video object": self.save_video_object,
@@ -768,14 +788,47 @@ class SettingsWindow(QDialog, Ui_Dialog):
                 self.detected_task = "none"
         # 以下三个为保存缺陷的用户勾选的缺陷类型
         if flag == "abnormal":
-            if "abnormal" not in self.save_video_object:
-                self.save_video_object += "abnormal,"
+            if self.radioButton_abnormal.isChecked():
+                if "abnormal" not in self.save_video_object:
+                    self.save_video_object += "abnormal"
+            else:
+                if "abnormal" in self.save_video_object:
+                    self.save_video_object = self.save_video_object.replace("abnormal", "")
         if flag == "vortex":
-            if "vortex" not in self.save_video_object:
-                self.save_video_object += "vortex,"
+            if self.radioButton_vortex.isChecked():
+                if "vortex" not in self.save_video_object:
+                    self.save_video_object += "vortex"
+            else:
+                if "vortex" in self.save_video_object:
+                    self.save_video_object = self.save_video_object.replace("vortex", "")
         if flag == "oil":
-            if "oil" not in self.save_video_object:
-                self.save_video_object += "oil"
+            if self.radioButton_oil.isChecked():
+                if "oil" not in self.save_video_object:
+                    self.save_video_object += "oil"
+            else:
+                if "oil" in self.save_video_object:
+                    self.save_video_object = self.save_video_object.replace("oil", "")
+        if flag == "abnormal_warning":
+            if self.radioButton_abnormal_warning.isChecked():
+                if "abnormal" not in self.warning_object:
+                    self.warning_object += "abnormal"
+            else:
+                if "abnormal" in self.warning_object:
+                    self.warning_object = self.warning_object.replace("abnormal", "")
+        if flag == "vortex_warning":
+            if self.radioButton_vortex_warning.isChecked():
+                if "vortex" not in self.warning_object:
+                    self.warning_object += "vortex"
+            else:
+                if "vortex" in self.warning_object:
+                    self.warning_object = self.warning_object.replace("vortex", "")
+        if flag == "oil_warning":
+            if self.radioButton_oil_warning.isChecked():
+                if "oil" not in self.warning_object:
+                    self.warning_object += "oil"
+            else:
+                if "oil" in self.warning_object:
+                    self.warning_object = self.warning_object.replace("oil", "")
 
     def get_ai_task(self, task):
         task = task.lower().replace(" ", "")
@@ -1156,6 +1209,7 @@ class ParamSave(object):
         self.file_name = "./params.json"    # 读取json文件的路径
         self.original_para = {"classes": "",                       # 检测的类别
                            "detected object": "",                   # 检测的目标
+                           "warning object":"",                   # 警报的目标
                            "detected task": "s",                     # 检测的任务
                            "model path": "./weights/detection",
                            "model name": "YOLOv8n",

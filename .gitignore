@@ -148,8 +148,8 @@ test4.py
 人工标注圆.py
 绘制透明矩形.py
 绘制透明矩形2.py
-icon.ico
 log.txt
+log_ip.txt
 src/qt/stream/modbus_test.py
 src/ui/001.ui
 src/ui/menu1 - 副本.ui
