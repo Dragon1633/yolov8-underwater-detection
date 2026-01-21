@@ -459,6 +459,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # 输出检测结果信息
                     current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                     for box in ai_output:
+                        # 优先过滤掉不在检测列表中的目标
+                        if box["class"] not in self.detected_object:
+                            continue
                         box = self.filter_vortex(box)
                         if box != []:
                             class_name = self.class_to_chinese(box["class"])

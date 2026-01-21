@@ -138,7 +138,7 @@ dmypy.json
 error_picture/
 save_picture/
 save_video/
-weights/
+#weights/
 dist/
 build/
 test.py
