@@ -26,22 +26,22 @@ def get_param(para_name):
     # 获取json文件参数
     filename = "./params.json"
     if os.path.exists(filename):
-        if para_name in ["classes", "detected object", "detected task", "model path", "model name", "whether save video", "save video path",
-                         "save error path", "save picture interval", "save picture path", "no object time", "exist object time",
-                         "waitkey time", "confidence", "iou", "focus", "scale", "modbus_ip", "modbus_port"]:
-            with open(filename, encoding='utf-8') as f:
-                content = f.read()
-                param = json.loads(content)[para_name]
-                if isinstance(param, (int, float)):
-                    return param
-                elif ',' in param:
-                    return [p.strip() for p in param.split(",") if p.strip() != ""]
-                elif '\\' in param:
-                    return param.replace('\\', '/')
-                else:
-                    return param
-        else:
-            raise "你想要获取的参数名称输入错误，请修改"
+        # if para_name in ["classes", "detected object", "detected task", "model path", "model name", "whether save video", "save video path",
+        #                  "save error path", "save picture interval", "save picture path", "no object time", "exist object time",
+        #                  "waitkey time", "confidence", "iou", "focus", "scale", "modbus_ip", "modbus_port"]:
+        with open(filename, encoding='utf-8') as f:
+            content = f.read()
+            param = json.loads(content)[para_name]
+            if isinstance(param, (int, float)):
+                return param
+            elif ',' in param:
+                return [p.strip() for p in param.split(",") if p.strip() != ""]
+            elif '\\' in param:
+                return param.replace('\\', '/')
+            else:
+                return param
+        # else:
+        #     raise "你想要获取的参数名称输入错误，请修改"
 
 
 def add_image_id(model_outputs, image_id):

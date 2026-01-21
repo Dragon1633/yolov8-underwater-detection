@@ -85,11 +85,10 @@ def draw_results(image, model_results, k=1):
         # txt_size = cv.getTextSize(text, font, 0.4, 1)[0]
         cv.rectangle(img_cpy, (x0, y0), (x1, y1), color, int(thickness*5*font_scale))
         # 如果是指定类，则将最大的边×比例尺显示出来
-        # if class_name == "vortex":
         if class_name == "person" or class_name == "vortex":      # person调试时候用
             max_side = max(x1 - x0, y1 - y0)
-            text = str(round(max_side*k, 1))+"mm"
-            txt_size = cv.getTextSize(text, font, 0.5, 1)[0]
+            text_mm = str(round(max_side*k, 1))+"mm"
+            txt_size = cv.getTextSize(text_mm, font, 0.5, 1)[0]
             cv.rectangle(
                 img_cpy,
                 (x0, y0 + 1),

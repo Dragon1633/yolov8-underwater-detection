@@ -184,240 +184,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.label_display)
         spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem5)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.groupBox_1 = QtWidgets.QGroupBox(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(13)
-        font.setBold(True)
-        
-        self.groupBox_1.setFont(font)
-        self.groupBox_1.setObjectName("groupBox_1")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.groupBox_1)
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.pushButton_setting = QtWidgets.QPushButton(self.groupBox_1)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_setting.sizePolicy().hasHeightForWidth())
-        self.pushButton_setting.setSizePolicy(sizePolicy)
-        self.pushButton_setting.setStyleSheet("QPushButton{\n"
-"    image: url(:/images/icons/setting.png);\n"
-"font-size: 14px;\n"
-"font-weight: bold;\n"
-"color:white;\n"
-"text-align: center center;\n"
-"padding-left: 5px;\n"
-"padding-right: 5px;\n"
-"padding-top: 4px;\n"
-"padding-bottom: 4px;\n"
-"border-style: solid;\n"
-"border-width: 0px;\n"
-"border-color: rgba(255, 255, 255, 255);\n"
-"border-radius: 3px;\n"
-"background-color: rgba(200, 200, 200,0);}\n"
-"\n"
-"QPushButton:focus{outline: none;}\n"
-"\n"
-"QPushButton::pressed{\n"
-"                     font-size: 14px;\n"
-"                     font-weight: bold;\n"
-"                     color:rgb(200,200,200);\n"
-"                     text-align: center center;\n"
-"                     padding-left: 5px;\n"
-"                     padding-right: 5px;\n"
-"                     padding-top: 4px;\n"
-"                     padding-bottom: 4px;\n"
-"                     border-style: solid;\n"
-"                     border-width: 0px;\n"
-"                     border-color: rgba(255, 255, 255, 255);\n"
-"                     border-radius: 3px;\n"
-"                     background-color:  #bf513b;}\n"
-"\n"
-"QPushButton::disabled{\n"
-"                     font-size: 14px;\n"
-"                     font-weight: bold;\n"
-"                     color:rgb(200,200,200);\n"
-"                     text-align: center center;\n"
-"                     padding-left: 5px;\n"
-"                     padding-right: 5px;\n"
-"                     padding-top: 4px;\n"
-"                     padding-bottom: 4px;\n"
-"                     border-style: solid;\n"
-"                     border-width: 0px;\n"
-"                     border-color: rgba(255, 255, 255, 255);\n"
-"                     border-radius: 3px;}\n"
-"QPushButton::hover {\n"
-"border-style: solid;\n"
-"border-width: 0px;\n"
-"border-radius: 0px;\n"
-"background-color: rgba(48,148,243,80);}url(:/images/icons/setting.png)")
-        self.pushButton_setting.setText("")
-        self.pushButton_setting.setObjectName("pushButton_setting")
-        self.horizontalLayout_3.addWidget(self.pushButton_setting)
-        self.horizontalLayout_3.setStretch(0, 1)
-        self.horizontalLayout.addWidget(self.groupBox_1)
-        self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(13)
-        font.setBold(True)
-        
-        self.groupBox_3.setFont(font)
-        self.groupBox_3.setObjectName("groupBox_3")
-        self.horizontalLayout_5 = QtWidgets.QHBoxLayout(self.groupBox_3)
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.pushButton_cam = QtWidgets.QPushButton(self.groupBox_3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_cam.sizePolicy().hasHeightForWidth())
-        self.pushButton_cam.setSizePolicy(sizePolicy)
-        self.pushButton_cam.setStyleSheet("QPushButton{\n"
-"    image: url(:/images/icons/camera_on.png);\n"
-"font-size: 14px;\n"
-"font-weight: bold;\n"
-"color:white;\n"
-"text-align: center center;\n"
-"padding-left: 5px;\n"
-"padding-right: 5px;\n"
-"padding-top: 4px;\n"
-"padding-bottom: 4px;\n"
-"border-style: solid;\n"
-"border-width: 0px;\n"
-"border-color: rgba(255, 255, 255, 255);\n"
-"border-radius: 3px;\n"
-"background-color: rgba(200, 200, 200,0);}\n"
-"\n"
-"QPushButton:focus{outline: none;}\n"
-"\n"
-"QPushButton::pressed{\n"
-"                     font-size: 14px;\n"
-"                     font-weight: bold;\n"
-"                     color:rgb(200,200,200);\n"
-"                     text-align: center center;\n"
-"                     padding-left: 5px;\n"
-"                     padding-right: 5px;\n"
-"                     padding-top: 4px;\n"
-"                     padding-bottom: 4px;\n"
-"                     border-style: solid;\n"
-"                     border-width: 0px;\n"
-"                     border-color: rgba(255, 255, 255, 255);\n"
-"                     border-radius: 3px;\n"
-"                     background-color:  #bf513b;}\n"
-"\n"
-"QPushButton::disabled{\n"
-"                     image: url(:/images/icons/camera_off.png);\n"
-"                     font-size: 14px;\n"
-"                     font-weight: bold;\n"
-"                     color:rgb(200,200,200);\n"
-"                     text-align: center center;\n"
-"                     padding-left: 5px;\n"
-"                     padding-right: 5px;\n"
-"                     padding-top: 4px;\n"
-"                     padding-bottom: 4px;\n"
-"                     border-style: solid;\n"
-"                     border-width: 0px;\n"
-"                     border-color: rgba(255, 255, 255, 255);\n"
-"                     border-radius: 3px;}\n"
-"QPushButton::hover {\n"
-"border-style: solid;\n"
-"border-width: 0px;\n"
-"border-radius: 0px;\n"
-"background-color: rgba(48,148,243,80);}url(:/images/icons/camera_on.png)")
-        self.pushButton_cam.setText("")
-        self.pushButton_cam.setObjectName("pushButton_cam")
-        self.horizontalLayout_5.addWidget(self.pushButton_cam)
-        self.horizontalLayout.addWidget(self.groupBox_3)
-        self.groupBox_5 = QtWidgets.QGroupBox(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        
-        self.groupBox_5.setFont(font)
-        self.groupBox_5.setStyleSheet("")
-        self.groupBox_5.setObjectName("groupBox_5")
-        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.groupBox_5)
-        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        self.spinBox_focus = QtWidgets.QSpinBox(self.groupBox_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.spinBox_focus.sizePolicy().hasHeightForWidth())
-        self.spinBox_focus.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("AcadEref")
-        font.setPointSize(-1)
-        self.spinBox_focus.setFont(font)
-        self.spinBox_focus.setStyleSheet("QSpinBox{\n"
-"background:rgba(200, 200, 200,50);\n"
-"color:white;\n"
-"font-size: 24px;\n"
-"border-style: solid;\n"
-"border-width: 1px;\n"
-"border-color: rgba(200, 200, 200,100);\n"
-"border-radius: 3px;\n"
-"padding-right: 10px;}\n"
-"\n"
-"QSpinBox::down-button{\n"
-"background:rgba(200, 200, 200,0);\n"
-"border-image: url(:/images/icons/botton_down.png);}\n"
-"QSpinBox::down-button::hover{\n"
-"background:rgba(200, 200, 200,100);\n"
-"border-image: url(:/images/icons/botton_down.png);}\n"
-"\n"
-"QSpinBox::up-button{\n"
-"background:rgba(200, 200, 200,0);\n"
-"border-image: url(:/images/icons/botton_up.png);}\n"
-"QSpinBox::up-button::hover{\n"
-"background:rgba(200, 200, 200,100);\n"
-"border-image: url(:/images/icons/botton_up.png);}\n"
-"\n"
-"QAbstractSpinBox::up-button { subcontrol-origin: border; }\n"
-"QAbstractSpinBox::down-button { subcontrol-origin: border; }")
-        self.spinBox_focus.setAlignment(QtCore.Qt.AlignCenter)
-        self.spinBox_focus.setButtonSymbols(QtWidgets.QAbstractSpinBox.UpDownArrows)
-        self.spinBox_focus.setMinimum(0)
-        self.spinBox_focus.setMaximum(1000)
-        self.spinBox_focus.setProperty("value", 100)
-        self.spinBox_focus.setObjectName("spinBox_focus")
-        self.horizontalLayout_6.addWidget(self.spinBox_focus)
-        self.horizontalSlider_focus = QtWidgets.QSlider(self.groupBox_5)
-        self.horizontalSlider_focus.setStyleSheet("QSlider{\n"
-"border-color: #bcbcbc;\n"
-"color:#d9d9d9;\n"
-"}\n"
-"QSlider::groove:horizontal {                                \n"
-"     border: 1px solid #999999;                             \n"
-"     height: 3px;                                           \n"
-"    margin: 0px 0;                                         \n"
-"     left: 5px; right: 5px; \n"
-" }\n"
-"QSlider::handle:horizontal {                               \n"
-"     border: 0px ; \n"
-"     border-image: url(:/images/icons/point.png);\n"
-"     width:15px;\n"
-"     margin: -7px -7px -7px -7px;                  \n"
-"} \n"
-"QSlider::add-page:horizontal{\n"
-"background: #d9d9d9; \n"
-"\n"
-"}\n"
-"QSlider::sub-page:horizontal{                               \n"
-" background: #373737;                     \n"
-"}")
-        self.horizontalSlider_focus.setMinimum(0)
-        self.horizontalSlider_focus.setMaximum(1000)
-        self.horizontalSlider_focus.setProperty("value", 100)
-        self.horizontalSlider_focus.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider_focus.setObjectName("horizontalSlider_focus")
-        self.horizontalLayout_6.addWidget(self.horizontalSlider_focus)
-        self.horizontalLayout.addWidget(self.groupBox_5)
-        self.horizontalLayout.setStretch(0, 1)
-        self.horizontalLayout.setStretch(1, 1)
-        self.horizontalLayout.setStretch(2, 8)
-        self.verticalLayout.addLayout(self.horizontalLayout)
-        self.verticalLayout.setStretch(0, 40)
-        self.verticalLayout.setStretch(1, 1)
+        self.verticalLayout.setStretch(0, 20)
         self.horizontalLayout_2.addLayout(self.verticalLayout)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -658,6 +425,9 @@ class Ui_MainWindow(object):
         font.setPointSize(16)
         self.menu_sizeCalibration.setFont(font)
         self.menu_sizeCalibration.setObjectName("menu_sizeCalibration")
+        self.menu_setting = QtWidgets.QAction(MainWindow)
+        self.menu_setting.setObjectName("menu_setting")
+        self.menu.addAction(self.menu_setting)
         self.menu.addAction(self.menu_sizeCalibration)
         self.menuBar.addAction(self.menu.menuAction())
 
@@ -673,9 +443,6 @@ class Ui_MainWindow(object):
         self.pushButton_outputExcel.setText(_translate("MainWindow", "异常清单导出"))
         self.pushButton_clear.setText(_translate("MainWindow", "一键清空屏蔽"))
         self.label.setText(_translate("MainWindow", "NG"))
-        self.groupBox_1.setTitle(_translate("MainWindow", "设置"))
-        self.groupBox_3.setTitle(_translate("MainWindow", "输入"))
-        self.groupBox_5.setTitle(_translate("MainWindow", "焦距"))
         item = self.tableWidget_results.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "序号"))
         item = self.tableWidget_results.horizontalHeaderItem(1)
@@ -696,4 +463,5 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "屏蔽区域"))
         self.menu.setTitle(_translate("MainWindow", "功能"))
         self.menu_sizeCalibration.setText(_translate("MainWindow", "尺寸标定"))
+        self.menu_setting.setText(_translate("MainWindow", "设置"))
 from src.ui import apprcc

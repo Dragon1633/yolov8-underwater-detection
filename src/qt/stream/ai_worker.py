@@ -56,7 +56,8 @@ class AiWorkerThread(QThread):
     def _init_tracker(self):
         if self.tracker_name == "deepsort":
             self.tracker = DeepSort(
-                model_path=os.path.join(ROOT, f"weights/ckpt.t7"))
+                model_path="weights/ckpt.t7")
+                # model_path=os.path.join(ROOT, f"weights/ckpt.t7"))
         elif self.tracker_name == "bytetrack":
             self.tracker = BYTETracker(
                 track_high_thresh=0.5,

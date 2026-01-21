@@ -8,21 +8,25 @@ import cv2 as cv
 import datetime
 import time
 import threading
+import shutil
+from datetime import datetime, timedelta
 
 from src.utils.general import get_param
 
-
 class CameraCaptureThread(QThread):
+    """实际采图线程"""
     send_video_info = pyqtSignal(dict)
     send_frame = pyqtSignal(list)       # 发送帧信号
     send_cameraIsOpen = pyqtSignal()    # 当摄像头断开时发送信号
 
     def __init__(self):
         super(CameraCaptureThread, self).__init__()
+
         self.thread_name = "CameraCaptureThread"
         self.threadFlag = False
         self.save_flag = not (get_param("whether save video") == 0)      # 是否启用保存标志位,当为0时不启用保存
         self.save_vedio = False     # 函数值判断是否保存视频
+        self.save_picture_days = get_param("save picture days")  # 保存图片的天数90
 
         self.video_info = []
         self.VM = cv.VideoWriter()          # 创建一个视频写入对象
@@ -35,14 +39,15 @@ class CameraCaptureThread(QThread):
     def set_start_config(self, ai_task, video_source=-1):
         self.threadFlag = True
         if video_source != -1:
-            self.get_video_source(video_source)
+            self.video_source = video_source
+        # self.video_source = rtsp_url
         self.ai_task = ai_task
         self.detected_object = get_param("detected object")
         self.video_path = get_param("save video path")         # 发现异常保存视频路径
         self.picture_path = get_param("save picture path")     # 启用每3s保存一张图片的路径
         self.save_picture_interval = get_param("save picture interval")
-        mkdir(self.video_path)
-        mkdir(self.picture_path)
+        os.makedirs(self.video_path, exist_ok=True)
+        os.makedirs(self.picture_path, exist_ok=True)
         # 每3s保存一张图片
         if self.ai_task in ["both", "save_picture"]:
             self.timer = QTimer(self)
@@ -52,13 +57,11 @@ class CameraCaptureThread(QThread):
             # timer.start()
             print("每3s保存一张图片开启！")
 
-    def get_video_source(self, video_source):
-        self.video_source = video_source
-
     def get_video_focus(self, focus):
         self.focus = focus
         try:
             if self.cap.isOpened():
+                print("设置焦距:", focus)
                 self.cap.set(cv.CAP_PROP_FOCUS, focus)
         except:
             print("更改焦距失败，无法读取到摄像头！")
@@ -85,7 +88,7 @@ class CameraCaptureThread(QThread):
         #         self.save_vedio = False
         #         self.time0 = -1
         # 创建视频
-        if self.threadFlag and  self.save_vedio and self.save_flag and self.VM.isOpened() is False and self.ai_task in ["both", "object_detection"]:
+        if self.threadFlag and self.save_vedio and self.save_flag and self.VM.isOpened() is False and self.ai_task in ["both", "object_detection"]:
             fourcc = cv.VideoWriter_fourcc(*"mp4v")  # 保存的格式
             # temp = self.video_path.split("/")
             # real_path = ""
@@ -112,12 +115,12 @@ class CameraCaptureThread(QThread):
 
     def run(self):
         try:
-            self.cap = cv.VideoCapture(self.video_source, cv.CAP_DSHOW)
+            self.cap = cv.VideoCapture(self.video_source)
         except:
             QtWidgets.QMessageBox.warning(None, "提示", "摄像头读取失败！")
 
         self.video_info = self.get_video_info(self.cap)
-        self.send_video_info.emit(self.video_info)
+        # self.send_video_info.emit(self.video_info)
 
         idx_frame = 0
         id = 0
@@ -136,14 +139,14 @@ class CameraCaptureThread(QThread):
                 time0 = time.time()
             id += 1
             # 视频保存
-            if self.ai_task in ["both", "object_detection"] and self.save_vedio:
-                # print("启用保存视频！")
-                self.start_save_video()
-                self.VM.write(self.frame)
-                cv.waitKey(1)
-            else:
-                if self.VM:
-                    self.VM.release()
+            # if self.ai_task in ["both", "object_detection"] and self.save_vedio:
+            #     # print("启用保存视频！")
+            #     self.start_save_video()
+            #     self.VM.write(self.frame)
+            #     cv.waitKey(1)
+            # else:
+            #     if self.VM:
+            #         self.VM.release()
             # 发送帧索引号和当前帧
             self.send_frame.emit(list([idx_frame, self.frame]))
             # print(idx_frame)
@@ -153,7 +156,7 @@ class CameraCaptureThread(QThread):
         self.cap.release()
         if self.VM:
             self.VM.release()
-        print("视频保存结束")
+            print("视频保存结束")
 
     def save_picture(self):
         # print("开始存图")
@@ -178,9 +181,62 @@ class CameraCaptureThread(QThread):
         try:
             cv.imwrite(h_dir + "/" + "Picture-{}.jpg".format(now_name), self.frame)
         except:
-            pass
+            print("保存图片失败！")
 
 
-def mkdir(path):#G-Dragon
+class CameraThread(QThread):
+    """该线程为了判断相机能够打开，解决rtsp推流相机未连接，自动延时30s，程序卡死的问题"""
+    # 定义信号：打开成功、打开失败、帧数据可用
+    opened = pyqtSignal()
+    def __init__(self, video_source, parent=None):
+        super().__init__(parent)
+        self.video_source = video_source
+        self.cap = None
+        self.running = True
+
+    def run(self):
+        # 尝试打开摄像头
+        self.cap = cv2.VideoCapture(self.video_source)
+
+        if not self.cap.isOpened():
+            return
+
+        # 打开成功，发出信号
+        self.opened.emit()
+
+    def stop(self):
+        self.wait(1000)  # 等待线程结束，最多1秒
+        if self.cap and self.cap.isOpened():
+            self.cap.release()
+
+
+
+def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def delete_old_images(directory, days_threshold):
+    """
+    删除指定天数前的图片目录（按 YYYY-MM-DD 结构组织）
+    """
+    current_time = datetime.now()
+    cutoff_time = current_time - timedelta(days=days_threshold)
+
+    for dir_name in os.listdir(directory):
+        dir_path = os.path.join(directory, dir_name)
+
+        if not os.path.isdir(dir_path):
+            continue
+
+        try:
+            dir_date = datetime.strptime(dir_name, "%Y-%m-%d")
+        except ValueError:
+            continue
+
+        if dir_date < cutoff_time:
+            try:
+                shutil.rmtree(dir_path)
+                print(f"已删除过期目录: {dir_path}")
+            except Exception as e:
+                print(f"删除目录失败: {dir_path}, 错误: {e}")

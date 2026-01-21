@@ -1,13 +1,13 @@
 # YOLOv8——水下检测项目
 水下检测软件界面
 
-![GUI](./data/ui.png)
+![GUI](./src/imgs/ui.png)
 
 **注意事项**
 
 - 使用的模型格式为onnx。
 - 目前检测的缺陷类型为旋涡（vortex）、异常出丝（abnormal）、漏油（oil）。
-- 连接的摄像头为USB网络摄像头，默认输入源为0。
+- 连接的摄像头为USB/RTSP推流网络摄像头，默认输入源为0。
 
 
 
@@ -25,3 +25,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## 打包
+使用PyInstaller打包：
+
+```shell
+pyinstaller -w main.py --icon="icon.ico" --exclude-module PyQt6 --exclude-module PySide2 -y 
+```
