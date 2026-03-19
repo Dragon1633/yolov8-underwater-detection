@@ -308,7 +308,7 @@ QPushButton:pressed {
            </spacer>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout" stretch="10,1">
+           <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1">
             <item>
              <widget class="QLabel" name="label_display_error">
               <property name="styleSheet">
@@ -404,7 +404,7 @@ QTabBar::tab:selected {
                    <bool>true</bool>
                   </attribute>
                   <attribute name="horizontalHeaderDefaultSectionSize">
-                   <number>90</number>
+                   <number>70</number>
                   </attribute>
                   <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                    <bool>false</bool>
@@ -625,7 +625,7 @@ QTabBar::tab:selected {
            </spacer>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="10,1">
+           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
             <item>
              <widget class="QLabel" name="label_display_error_2">
               <property name="styleSheet">
@@ -721,7 +721,7 @@ QTabBar::tab:selected {
                    <bool>true</bool>
                   </attribute>
                   <attribute name="horizontalHeaderDefaultSectionSize">
-                   <number>90</number>
+                   <number>70</number>
                   </attribute>
                   <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                    <bool>false</bool>

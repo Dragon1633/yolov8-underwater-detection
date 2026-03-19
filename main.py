@@ -29,19 +29,19 @@ from PyQt5.QtCore import Qt, pyqtSignal, QPoint, QTimer
 video_source_1 = 0
 video_source_2 = 1
 
-# 初步验证视频源 1
-cap = cv2.VideoCapture(video_source_1)
-ret, _ = cap.read()
-if not ret:
-    video_source_1 = "rtsp://192.168.1.168:554/ch01.264"
-del cap, ret
+# 现场使用的水下相机是rtsp推流的，需要替换video_source
+# cap = cv2.VideoCapture(video_source_1)
+# ret, _ = cap.read()
+# if not ret:
+#     video_source_1 = "rtsp://192.168.1.168:554/ch01.264"
+# del cap, ret
+#
 
-# 初步验证视频源 2
-cap2 = cv2.VideoCapture(video_source_2)
-ret2, _ = cap2.read()
-if not ret2:
-    video_source_2 = "rtsp://192.168.1.169:554/ch01.264"  # 示例备用地址
-del cap2, ret2
+# cap2 = cv2.VideoCapture(video_source_2)
+# ret2, _ = cap2.read()
+# if not ret2:
+#     video_source_2 = "rtsp://192.168.1.169:554/ch01.264"  # 示例备用地址
+# del cap2, ret2
 
 
 def get_ipv4_addresses():
@@ -137,6 +137,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.get_para()
         self.init_slots()
+        self.showMaximized()
 
         self.cam_whe_useful_thread_1 = CameraThread(self.video_source_1)
         self.cam_whe_useful_thread_2 = CameraThread(self.video_source_2)
@@ -552,7 +553,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         box = self.filter_vortex(box)
                         if box != []:
                             class_name = self.class_to_chinese(box["class"])
-                            each_item = [str(self.index[cam_id]), class_name, "{:.1f}%".format(box["confidence"] * 100),
+                            each_item = [class_name, "{:.1f}%".format(box["confidence"] * 100),
                                          str(current_time)]
                             if box["class"] not in self.existing_class[cam_id]:
                                 self.time_interval[cam_id] = -1
