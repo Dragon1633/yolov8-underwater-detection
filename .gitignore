@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # model weights
-*.onnx
+#*.onnx
 *.pth
 *.pt
 
