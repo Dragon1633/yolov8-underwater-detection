@@ -21,9 +21,9 @@ from src.ui.main_window_end import Ui_MainWindow
 from src.ui.menu_setting import Ui_Dialog
 from src.ui.menu1 import Ui_Menu1
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtWidgets import QDialog, QMessageBox, QFileDialog, QLabel
+from PyQt5.QtWidgets import QDialog, QMessageBox, QFileDialog, QLabel, QSplashScreen
 from PyQt5.QtGui import QImage, QPixmap, QPen, QColor, QPainter
-from PyQt5.QtCore import Qt, pyqtSignal, QPoint, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QPoint, QTimer, QSharedMemory
 
 video_source = 0
 cap = cv2.VideoCapture(video_source)
@@ -157,16 +157,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.display_thread.get_screen_size(self.screen_size)
 
     def closeEvent(self, event):
-        if self.camera_thread.isRunning():
-            self.display_thread.stop_display()
-            self.ai_thread.stop_process()
-            self.camera_thread.stop_capture()
-            self.cleanup_thread.stop()
-            if self.modbus_whether_on:
-                self.modbus_thread.stop_output_state()
+        # 1. 第一时间隐藏窗口，给用户“秒关”的体验
+        self.hide()
+        # 2. 刷新 GUI 事件循环，确保窗口立刻消失
+        QtWidgets.QApplication.processEvents()
+        # 3. 记录日志
         now = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
         with open('log.txt', 'a') as file:
             file.write(now + '\t' + "软件关闭" + '\n')
+        # 4. 释放各个后台资源
+        try:
+            if self.camera_thread.isRunning():
+                self.display_thread_1.stop_display()
+                self.ai_thread_1.stop_process()
+                self.camera_thread.stop_capture()
+            self.cleanup_thread.stop()
+
+            if self.modbus_whether_on:
+                self.modbus_thread.stop_output_state()
+        except Exception as e:
+            print(f"关闭线程时发生异常: {e}")
+        with open('log.txt', 'a') as file:
+            file.write(now + '\t' + "软件彻底关闭" + '\n')
+        # 5. 接受关闭事件，正式退出进程
+        event.accept()
 
     def get_para(self):
         """获取json文件参数"""
@@ -1272,12 +1286,10 @@ class ParamSave(object):
             if k in set_dict.keys():
                 self.param_kw[k] = set_dict[k]
 
-
-
-
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
 
 
 if __name__ == '__main__':

@@ -47,7 +47,7 @@ class Ui_MainWindow(object):
         font.setFamily("宋体")
         font.setPointSize(18)
         font.setBold(True)
-        
+        font.setWeight(75)
         self.pushButton_stopWarning.setFont(font)
         self.pushButton_stopWarning.setStyleSheet("QPushButton {\n"
 "    background-color: rgb(192, 216, 255); /* 浅灰色 */\n"
@@ -76,7 +76,7 @@ class Ui_MainWindow(object):
         font.setFamily("宋体")
         font.setPointSize(18)
         font.setBold(True)
-        
+        font.setWeight(75)
         self.pushButton_stopWarning_2.setFont(font)
         self.pushButton_stopWarning_2.setStyleSheet("QPushButton {\n"
 "    background-color: rgb(192, 216, 255); /* 浅灰色 */\n"
@@ -105,7 +105,7 @@ class Ui_MainWindow(object):
         font.setFamily("宋体")
         font.setPointSize(15)
         font.setBold(True)
-        
+        font.setWeight(75)
         self.pushButton_outputExcel.setFont(font)
         self.pushButton_outputExcel.setStyleSheet("QPushButton {\n"
 "    background-color: rgb(192, 216, 255); /* 浅灰色 */\n"
@@ -134,7 +134,7 @@ class Ui_MainWindow(object):
         font.setFamily("宋体")
         font.setPointSize(15)
         font.setBold(True)
-        
+        font.setWeight(75)
         self.pushButton_clear.setFont(font)
         self.pushButton_clear.setStyleSheet("QPushButton {\n"
 "    background-color: rgb(192, 216, 255); /* 浅灰色 */\n"
@@ -252,7 +252,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_results.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -260,7 +260,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_results.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
@@ -268,7 +268,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_results.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
@@ -276,7 +276,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_results.setHorizontalHeaderItem(3, item)
         self.tableWidget_results.horizontalHeader().setCascadingSectionResizes(True)
@@ -321,7 +321,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_ignore.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -329,7 +329,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_ignore.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
@@ -337,7 +337,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_ignore.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
@@ -345,7 +345,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        
+        font.setWeight(75)
         item.setFont(font)
         self.tableWidget_ignore.setHorizontalHeaderItem(3, item)
         self.tableWidget_ignore.horizontalHeader().setCascadingSectionResizes(True)
@@ -371,7 +371,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(14)
         font.setBold(True)
-        
+        font.setWeight(75)
         self.menuBar.setFont(font)
         self.menuBar.setStyleSheet("QMenu {\n"
 "background-color:rgba(17,24,47,1);\n"
@@ -399,7 +399,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(16)
         font.setBold(True)
-        
+        font.setWeight(75)
         self.menu.setFont(font)
         self.menu.setStyleSheet("QMenu::item {\n"
 "min-width:50px;\n"
@@ -464,4 +464,5 @@ class Ui_MainWindow(object):
         self.menu.setTitle(_translate("MainWindow", "功能"))
         self.menu_sizeCalibration.setText(_translate("MainWindow", "尺寸标定"))
         self.menu_setting.setText(_translate("MainWindow", "设置"))
+
 from src.ui import apprcc
