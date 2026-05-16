@@ -292,9 +292,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def process_camera(self):
         """ 判断摄像头是否可用，是则启动拍摄检测线程 """
         self.label_display.setText('<font color="white">正在尝试连接摄像头 1...</font>')
-        self.label_display.setAlignment(Qt.AlignCenter)
+        self.label_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_display_2.setText('<font color="white">正在尝试连接摄像头 2...</font>')
-        self.label_display_2.setAlignment(Qt.AlignCenter)
+        self.label_display_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         if not self.timer_1.isActive():
             self.cam_whe_useful_thread_1.opened.connect(lambda: self.start_thread(1))
@@ -564,7 +564,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 self.existing_class[cam_id].append(box["class"])
                                 for j in range(len(each_item)):
                                     item = QtWidgets.QTableWidgetItem(str(each_item[j]))
-                                    item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                                    item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
                                     table.setItem(row, j, item)
 
                     table.verticalScrollBar().setValue(table.verticalScrollBar().maximum())
@@ -644,7 +644,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidget_ignore.insertRow(row)
         for j in range(len(each_item)):
             item = QtWidgets.QTableWidgetItem(str(each_item[j]))
-            item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+            item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
             self.tableWidget_ignore.setItem(row, j, item)
         self.tableWidget_ignore.verticalScrollBar().setValue(self.tableWidget_ignore.verticalScrollBar().maximum())
 
@@ -1033,7 +1033,7 @@ class Menu1(QDialog, Ui_Menu1):
 
         def __init__(self, parent=None):
             super().__init__(parent)
-            self.setAlignment(Qt.AlignCenter)
+            self.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.pixmap_loaded = False
             self.points = []
             self.temp_point = None
@@ -1053,11 +1053,11 @@ class Menu1(QDialog, Ui_Menu1):
 
         def mousePressEvent(self, event):
             if self.pixmap_loaded:
-                if event.button() == Qt.RightButton:
+                if event.button() == Qt.MouseButton.RightButton:
                     self.points.clear()
                     self.temp_point = None
                     self.update()
-                elif event.button() == Qt.LeftButton:
+                elif event.button() == Qt.MouseButton.LeftButton:
                     if len(self.points) < 2:
                         self.points.append(event.pos())
                         self.temp_point = None
